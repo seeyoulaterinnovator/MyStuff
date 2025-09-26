@@ -7,6 +7,7 @@ import jakarta.ws.rs.NotFoundException;
 import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.entity.RealmBrandEntity;
 import ru.alamics.sso.jpa.repository.BrandRepository;
+import ru.alamics.sso.jpa.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,8 @@ public class BrandService {
 
     @Inject
     BrandRepository brandRepository;
+    @Inject
+    UserRepository userRepository;
 
     public List<BrandEntity> getAllBrands() {
         return brandRepository.findAll();
@@ -63,6 +66,12 @@ public class BrandService {
 
     @Transactional
     public void removeBrandFromRealm(String realmId, String brandId) {
+        long countMarkBrandIds = userRepository.countByMarkBrandId(brandId);
+        if (countMarkBrandIds > 0) {
+            throw new IllegalStateException(
+                    "Нельзя удалить бренд " + brandId + ", так как он используется у " + countMarkBrandIds + " пользователей."
+            );
+        }
         brandRepository.removeBrandFromRealm(realmId, brandId);
     }
 

@@ -90,20 +90,20 @@ public class UserRepository {
         String realmName = realmId == null ? "user" : realmId;
 
         List<UserEntity> users = (List<UserEntity>) em.createNativeQuery(
-                "select * " +
-                        "  from USER_ENTITY ue " +
-                        "  where " +
-                        " ue.REALM_ID = :realmId and " +
-                        "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
-                        "    and exists ( " +
-                        "      select 1 " +
-                        "      from USER_ATTRIBUTE attr " +
-                        "      where attr.USER_ID = ue.ID " +
-                        "        and attr.NAME = :name " +
-                        "        and attr.VALUE = :phoneNmbr " +
-                        "    )" +
-                        "  limit 1"
-                , UserEntity.class)
+                        "select * " +
+                                "  from USER_ENTITY ue " +
+                                "  where " +
+                                " ue.REALM_ID = :realmId and " +
+                                "     (:excludedUserId is null or ue.ID <> :excludedUserId) " +
+                                "    and exists ( " +
+                                "      select 1 " +
+                                "      from USER_ATTRIBUTE attr " +
+                                "      where attr.USER_ID = ue.ID " +
+                                "        and attr.NAME = :name " +
+                                "        and attr.VALUE = :phoneNmbr " +
+                                "    )" +
+                                "  limit 1"
+                        , UserEntity.class)
                 .setParameter("realmId", realmName)
                 .setParameter("name", "phone")
                 .setParameter("phoneNmbr", phone)
@@ -118,7 +118,7 @@ public class UserRepository {
 
     public UserEntity getFirstUserByEmail(String realmId, String email) {
         List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
-                "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
+                        "  where u.realmId = :realmId and u.email = :email ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("email", email)
                 .getResultList();
@@ -130,7 +130,7 @@ public class UserRepository {
 
     public UserEntity getFirstUserByUsername(String realmId, String username) {
         List<UserEntity> users = em.createQuery("select u from UserEntity u \n" +
-                "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
+                        "  where u.realmId = :realmId and u.username = :username ", UserEntity.class)
                 .setParameter("realmId", realmId)
                 .setParameter("username", username)
                 .getResultList();
@@ -201,8 +201,8 @@ public class UserRepository {
                 getLimit(pageNum, pageSize);
 
         Query query = em.createNativeQuery(
-                queryStr
-                , Tuple.class)
+                        queryStr
+                        , Tuple.class)
                 .setParameter("search", search)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -266,7 +266,7 @@ public class UserRepository {
                                 "                                                         UE.emailVerified) " +
                                 "from UserEntity UE\n" +
                                 "         left join UserAttributeEntity UA on UE = UA.user AND UA.name = 'phone'\n" +
-                                "WHERE UE.realmId = :realm\n"+
+                                "WHERE UE.realmId = :realm\n" +
                                 getSort(sortField, sortAsc)
                         , UserSummaryView.class)
                 .setParameter("realm", realm);
@@ -352,26 +352,26 @@ public class UserRepository {
         }
 
         Query query = em.createNativeQuery(
-                "select UE.id, " +
-                        "         UE.USERNAME," +
-                        "         UE.FIRST_NAME, " +
-                        "         UE.LAST_NAME, " +
-                        "         UE.EMAIL, " +
-                        "         UA.VALUE as PHONE, " +
-                        "         UE.ENABLED, " +
-                        "         UE.EMAIL_VERIFIED " +
-                        "from USER_ENTITY UE \n" +
-                        "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
-                        "WHERE UE.REALM_ID = :realm \n" +
-                        "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
-                        "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
-                        "  and (:searchToms is null or :searchToms = '' or exists(" +
-                        "    select UP.id \n" +
-                        "    from USER_POST UP \n" +
-                        "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
-                        "  ) \n" +
-                        getNativeSort(sortField, sortAsc)
-                , USER_SUMMARY_MAPPER_NAME)
+                        "select UE.id, " +
+                                "         UE.USERNAME," +
+                                "         UE.FIRST_NAME, " +
+                                "         UE.LAST_NAME, " +
+                                "         UE.EMAIL, " +
+                                "         UA.VALUE as PHONE, " +
+                                "         UE.ENABLED, " +
+                                "         UE.EMAIL_VERIFIED " +
+                                "from USER_ENTITY UE \n" +
+                                "left join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID and UA.NAME = 'phone' \n" +
+                                "WHERE UE.REALM_ID = :realm \n" +
+                                "  and (:search is null or :search = '' or MATCH(UE.EMAIL, UE.FIRST_NAME, UE.USERNAME) AGAINST(:search IN BOOLEAN MODE)) \n" +
+                                "  and (:searchUser is null or :searchUser = '' or UE.id = :searchUser) \n" +
+                                "  and (:searchToms is null or :searchToms = '' or exists(" +
+                                "    select UP.id \n" +
+                                "    from USER_POST UP \n" +
+                                "    where UP.USER_ID = UE.ID and UP.TOMS_ID = :searchToms) \n" +
+                                "  ) \n" +
+                                getNativeSort(sortField, sortAsc)
+                        , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("search", fullTextSearch)
                 .setParameter("searchUser", searchUser)
                 .setParameter("searchToms", searchToms)
@@ -398,21 +398,21 @@ public class UserRepository {
             searchPhone = searchPhone + "*";
 
         Query query = em.createNativeQuery(
-                "select UE.id, " +
-                        "        UE.USERNAME," +
-                        "        UE.FIRST_NAME, " +
-                        "        UE.LAST_NAME, " +
-                        "        UE.EMAIL, " +
-                        "        UA.VALUE as PHONE, " +
-                        "        UE.ENABLED, " +
-                        "        UE.EMAIL_VERIFIED " +
-                        "from USER_ENTITY UE \n" +
-                        "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
-                        "where UE.REALM_ID = :realm \n" +
-                        "  and UA.NAME = 'phone' \n" +
-                        "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
-                        getNativeSort(sortField, sortAsc)
-                , USER_SUMMARY_MAPPER_NAME)
+                        "select UE.id, " +
+                                "        UE.USERNAME," +
+                                "        UE.FIRST_NAME, " +
+                                "        UE.LAST_NAME, " +
+                                "        UE.EMAIL, " +
+                                "        UA.VALUE as PHONE, " +
+                                "        UE.ENABLED, " +
+                                "        UE.EMAIL_VERIFIED " +
+                                "from USER_ENTITY UE \n" +
+                                "join USER_ATTRIBUTE UA on UE.ID = UA.USER_ID \n" +
+                                "where UE.REALM_ID = :realm \n" +
+                                "  and UA.NAME = 'phone' \n" +
+                                "  and MATCH(UA.VALUE) AGAINST(:searchPhone IN BOOLEAN MODE) \n" +
+                                getNativeSort(sortField, sortAsc)
+                        , USER_SUMMARY_MAPPER_NAME)
                 .setParameter("searchPhone", searchPhone)
                 .setParameter("realm", realm);
 
@@ -490,5 +490,17 @@ public class UserRepository {
         limit = Math.max(1, limit);
 
         return " LIMIT " + limit + " OFFSET " + (page - 1) * limit;
+    }
+
+    public long countByMarkBrandId(String brandId) {
+        String sql = "SELECT COUNT(*) " +
+                "FROM USER_ATTRIBUTE UA " +
+                "WHERE UA.NAME = 'markBrandId' AND UA.VALUE = :brandId";
+
+        Number result = (Number) em.createNativeQuery(sql)
+                .setParameter("brandId", brandId)
+                .getSingleResult();
+
+        return result.longValue();
     }
 }
