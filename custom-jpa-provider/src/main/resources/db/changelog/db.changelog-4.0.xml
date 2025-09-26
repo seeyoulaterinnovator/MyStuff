@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="2025-09-26-create-utils-1" author="vakilev.aa" runAlways="true">
+    <changeSet id="2025-09-26-create-utils-1" author="vakilev.aa">
         <sql splitStatements="false">
             CREATE PROCEDURE safe_drop_index(IN tbl VARCHAR(64), IN idx VARCHAR(64))
             BEGIN
@@ -27,7 +27,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="2025-09-26-create-utils-2" author="vakilev.aa" runAlways="true">
+    <changeSet id="2025-09-26-create-utils-2" author="vakilev.aa">
         <sql splitStatements="false">
             CREATE PROCEDURE safe_drop_fk(IN tbl VARCHAR(64), IN fk VARCHAR(64))
             BEGIN
@@ -50,7 +50,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="2025-09-26-create-utils-3" author="vakilev.aa" runAlways="true">
+    <changeSet id="2025-09-26-create-utils-3" author="vakilev.aa">
         <sql splitStatements="false">
             CREATE PROCEDURE safe_drop_column(IN tbl VARCHAR(64), IN col VARCHAR(64))
             BEGIN
@@ -72,7 +72,7 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="2025-09-26-create-utils-4" author="vakilev.aa" runAlways="true">
+    <changeSet id="2025-09-26-create-utils-4" author="vakilev.aa">
         <sql splitStatements="false">
             CREATE PROCEDURE safe_drop_table(IN tbl VARCHAR(64))
             BEGIN
@@ -368,6 +368,8 @@
                 ADD UNIQUE INDEX UK_REALM_BRAND_REALM_BRAND (REALM_ID,BRAND_ID);
         </sql>
         <rollback>
+            CALL safe_drop_fk('REALM_BRAND', 'FK_REALM_BRAND_BRAND');
+            CALL safe_drop_fk('REALM_BRAND', 'FK_REALM_BRAND_REALM');
             CALL safe_drop_index('REALM_BRAND', 'UK_REALM_BRAND_REALM_BRAND');
         </rollback>
     </changeSet>
@@ -383,18 +385,6 @@
         <rollback>
             CALL safe_drop_index('REALM_BRAND', 'UK_REALM_BRAND_DEFAULT');
             CALL safe_drop_column('REALM_BRAND', 'DEFAULT_REALM_UNIQ');
-        </rollback>
-    </changeSet>
-
-    <changeSet id="2025-09-26-drop-utils" author="vakilev.aa" runAlways="true">
-        <sql>
-            DROP PROCEDURE IF EXISTS safe_drop_index;
-            DROP PROCEDURE IF EXISTS safe_drop_fk;
-            DROP PROCEDURE IF EXISTS safe_drop_column;
-            DROP PROCEDURE IF EXISTS safe_drop_table;
-        </sql>
-        <rollback>
-            -- Nothing to rollback
         </rollback>
     </changeSet>
 
