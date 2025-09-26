@@ -46,36 +46,18 @@
         </createTable>
     </changeSet>
 
-    <!-- 2.1 FK на BRAND -->
-    <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_BRAND"/>
-            <tableExists tableName="BRAND"/>
-            <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
-            </not>
-        </preConditions>
-        <addForeignKeyConstraint baseTableName="REALM_BRAND"
-                                 baseColumnNames="BRAND_ID"
-                                 constraintName="FK_REALM_BRAND_BRAND"
-                                 referencedTableName="BRAND"
-                                 referencedColumnNames="ID"/>
-    </changeSet>
-
-    <!-- 2.2 FK на REALM -->
-    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
+    <!-- 2.x Навешиваем FK через SQL -->
+    <changeSet id="2025-09-26-2-fk-constraints-sql" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
-            <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
-            </not>
+            <tableExists tableName="BRAND"/>
         </preConditions>
-        <addForeignKeyConstraint baseTableName="REALM_BRAND"
-                                 baseColumnNames="REALM_ID"
-                                 constraintName="FK_REALM_BRAND_REALM"
-                                 referencedTableName="REALM"
-                                 referencedColumnNames="ID"/>
+        <sql>
+            ALTER TABLE REALM_BRAND
+                ADD CONSTRAINT FK_REALM_BRAND_BRAND FOREIGN KEY (BRAND_ID) REFERENCES BRAND(ID),
+              ADD CONSTRAINT FK_REALM_BRAND_REALM FOREIGN KEY (REALM_ID) REFERENCES REALM(ID);
+        </sql>
     </changeSet>
 
     <!-- 3. Наполняем таблицу BRAND всеми брендами -->
