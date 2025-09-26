@@ -18,7 +18,11 @@ import { OkIcon } from "@patternfly/react-icons";
 import { useRealm } from "../context/realm-context/RealmContext";
 import { useConfirmDialog } from "../components/confirm-dialog/ConfirmDialog";
 import { useAlerts } from "../components/alert/Alerts";
-import { RealmBrandAddModal } from "../components/realm-brands/RealmBrandAddModal";
+import {
+  RealmBrandAddForm,
+  RealmBrandAddModal,
+} from "../components/realm-brands/RealmBrandAddModal";
+import { useForm } from "react-hook-form";
 
 export const BrandsTab = () => {
   const { adminClient } = useAdminClient();
@@ -27,11 +31,11 @@ export const BrandsTab = () => {
 
   const { realm, realmBrands, refresh: refreshRealm } = useRealm();
   const [allBrands, setAllBrands] = useState<BrandRepresentation[]>([]);
-  const [isShowRealmBrandAddModal, setIsShowRealmBrandAddModal] =
-    useState(false);
+  const [isShowAddModal, setIsShowAddModal] = useState(false);
   const [selected, setSelected] = useState<RealmBrandRepresentation | null>(
     null,
   );
+  const form = useForm<RealmBrandAddForm>();
   const [key, setKey] = useState(0);
   const refresh = () => setKey(key + 1);
 
@@ -57,21 +61,42 @@ export const BrandsTab = () => {
     return await Promise.resolve(realmBrands);
   };
 
-  const setAsDefault = async (brandId: string) => {
-    await adminClient.customBrands.setDefaultBrand({
-      realm,
-      brandId,
-    });
-    refreshRealm();
+  const closeAddModal = () => {
+    setIsShowAddModal(false);
+    form.setValue("brandId", "");
   };
 
-  const addBrand = async (brandId: string) => {
-    await adminClient.customBrands.addRealmBrand({
-      realm,
-      brandId,
-    });
-    setIsShowRealmBrandAddModal(false);
-    refreshRealm();
+  const setAsDefault = async (brandId: string, brandName: string) => {
+    try {
+      await adminClient.customBrands.setDefaultBrand({
+        realm,
+        brandId,
+      });
+      addAlert(
+        t("setAsDefaultBrandSuccess", { name: brandName }),
+        AlertVariant.success,
+      );
+    } catch (error) {
+      addError(t("setAsDefaultBrandError"), error);
+    } finally {
+      closeAddModal();
+      refreshRealm();
+    }
+  };
+
+  const addBrand = async ({ brandId }: RealmBrandAddForm) => {
+    try {
+      await adminClient.customBrands.addRealmBrand({
+        realm,
+        brandId,
+      });
+      addAlert(t("addRealmBrandSuccess"), AlertVariant.success);
+    } catch (error) {
+      addError(t("addRealmBrandError"), error);
+    } finally {
+      closeAddModal();
+      refreshRealm();
+    }
   };
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
@@ -105,11 +130,12 @@ export const BrandsTab = () => {
 
   return (
     <>
-      {isShowRealmBrandAddModal && (
+      {isShowAddModal && (
         <RealmBrandAddModal
           brands={filteredBrands}
-          onAdd={addBrand}
-          onClose={() => setIsShowRealmBrandAddModal(false)}
+          form={form}
+          save={addBrand}
+          onClose={closeAddModal}
         />
       )}
       <DeleteConfirm />
@@ -123,7 +149,7 @@ export const BrandsTab = () => {
           <ToolbarItem>
             <Button
               data-testid="addBrand"
-              onClick={() => setIsShowRealmBrandAddModal(true)}
+              onClick={() => setIsShowAddModal(true)}
             >
               {t("addBrand")}
             </Button>
@@ -133,7 +159,7 @@ export const BrandsTab = () => {
           {
             title: t("setAsDefaultBrand"),
             onRowClick: async (row) => {
-              setAsDefault(row.brandId);
+              setAsDefault(row.brandId, row.brandName);
               return false;
             },
           },
@@ -164,7 +190,7 @@ export const BrandsTab = () => {
             message={t(`noRealmBrands-realm-brands`)}
             instructions={t(`noRealmBrandsInstructions-realm-brands`)}
             primaryActionText={t("addBrand")}
-            onPrimaryAction={() => setIsShowRealmBrandAddModal(true)}
+            onPrimaryAction={() => setIsShowAddModal(true)}
           />
         }
       />

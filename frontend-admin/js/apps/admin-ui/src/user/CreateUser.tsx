@@ -75,6 +75,34 @@ export default function CreateUser() {
       }
 
       form.setValue("attributes.locale", realm?.defaultLocale || "");
+
+      // Кастомизируем поле бренд
+      const markBrandId = (userProfileMetadata?.attributes ?? []).find(
+        (attribute) => attribute.name === "markBrandId",
+      );
+
+      if (markBrandId) {
+        markBrandId.annotations = markBrandId.annotations ?? {};
+        markBrandId.annotations.inputType = "select";
+
+        markBrandId.validators = markBrandId.validators ?? {};
+        markBrandId.validators.options = {
+          options: realmBrands.map((realmBrand) => realmBrand.brandId),
+        };
+
+        markBrandId.annotations.inputOptionLabels = realmBrands.reduce(
+          (acc, realmBrand) => {
+            acc[realmBrand.brandId] = realmBrand.brandName;
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
+
+        markBrandId.annotations.defaultValue = realmBrands.find(
+          (realmBrand) => realmBrand.default,
+        )?.brandId;
+      }
+
       setUserProfileMetadata(userProfileMetadata);
     },
     [searchRealmName],

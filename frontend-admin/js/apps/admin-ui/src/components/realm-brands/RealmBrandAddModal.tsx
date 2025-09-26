@@ -1,28 +1,33 @@
 import {
   Button,
   ButtonVariant,
+  Form,
   Modal,
   ModalVariant,
 } from "@patternfly/react-core";
 import { useTranslation } from "react-i18next";
 import { BrandRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/brandRepresentation";
+import { FormProvider, SubmitHandler, UseFormReturn } from "react-hook-form";
+import { SelectControl } from "@keycloak/keycloak-ui-shared";
+
+export type RealmBrandAddForm = {
+  brandId: string;
+};
 
 type RealmBrandAddModalProps = {
   brands: BrandRepresentation[];
-  onAdd?: (brandId: string) => void;
+  form: UseFormReturn<RealmBrandAddForm>;
+  save: SubmitHandler<RealmBrandAddForm>;
   onClose: () => void;
 };
 
 export const RealmBrandAddModal = ({
-  onAdd,
+  brands,
+  form,
+  save,
   onClose,
 }: RealmBrandAddModalProps) => {
   const { t } = useTranslation();
-
-  const handleAddBrand = () => {
-    // добавление будет пофикшено в отдельном коммите
-    onAdd?.("550e8400-e29b-41d4-a716-446655440003");
-  };
 
   return (
     <Modal
@@ -36,7 +41,7 @@ export const RealmBrandAddModal = ({
           key="confirm"
           variant="primary"
           type="submit"
-          onClick={handleAddBrand}
+          form="realm-brand-add-form"
         >
           {t("add")}
         </Button>,
@@ -51,7 +56,24 @@ export const RealmBrandAddModal = ({
         </Button>,
       ]}
     >
-      {"Add brand"}
+      <Form id="realm-brand-add-form" onSubmit={form.handleSubmit(save)}>
+        <FormProvider {...form}>
+          <SelectControl
+            name="brandId"
+            label={t("brand")}
+            controller={{
+              defaultValue: "",
+              rules: {
+                required: t("required"),
+              },
+            }}
+            options={brands.map((brand) => ({
+              key: brand.brandId,
+              value: brand.brandName,
+            }))}
+          />
+        </FormProvider>
+      </Form>
     </Modal>
   );
 };
