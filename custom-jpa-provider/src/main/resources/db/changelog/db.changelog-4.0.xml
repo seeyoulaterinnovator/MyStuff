@@ -46,10 +46,20 @@
         </createTable>
     </changeSet>
 
+    <!-- 2.0 Фикс: приведение REALM_ID к правильному типу (для stage5) -->
+    <changeSet id="2025-09-26-12-42-fix-realm-id-length" author="vakilev.aa" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
+        <modifyDataType tableName="REALM_BRAND"
+                        columnName="REALM_ID"
+                        newDataType="VARCHAR(36)"/>
+    </changeSet>
+
+
     <!-- 2.1 Добавляем FK на BRAND -->
     <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="BRAND"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
@@ -62,21 +72,14 @@
                                  referencedColumnNames="ID"/>
     </changeSet>
 
-    <!-- 2.2 Приводим REALM_ID к типу и кодировке REALM.ID, затем добавляем FK -->
+    <!-- 2.2 Добавляем FK на REALM -->
     <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
             </not>
         </preConditions>
-        <!-- Приводим REALM_ID к типу varchar(36) и utf8mb4 -->
-        <modifyDataType tableName="REALM_BRAND"
-                        columnName="REALM_ID"
-                        newDataType="VARCHAR(36)"/>
-        <sql>ALTER TABLE REALM_BRAND CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
-        <!-- Добавляем сам FK -->
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
                                  constraintName="FK_REALM_BRAND_REALM"
@@ -84,20 +87,13 @@
                                  referencedColumnNames="ID"/>
     </changeSet>
 
-
-    <changeSet id="2025-09-27-2b-fk-realm-fix" author="vakilev.aa">
+    <changeSet id="2025-09-26-2b-12-42-fix-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
             </not>
         </preConditions>
-
-        <!-- Исправляем тип REALM_ID, если вдруг отличается -->
-        <modifyDataType tableName="REALM_BRAND" columnName="REALM_ID" newDataType="VARCHAR(36)"/>
-
-        <!-- Добавляем внешний ключ -->
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
                                  constraintName="FK_REALM_BRAND_REALM"
