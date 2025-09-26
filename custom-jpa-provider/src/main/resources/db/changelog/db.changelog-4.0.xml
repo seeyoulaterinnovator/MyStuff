@@ -36,7 +36,8 @@
             <column name="ID" type="CHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="REALM_ID" type="VARCHAR(64)">
+            <!-- Исправлено: REALM_ID теперь CHAR(36), как в таблице REALM -->
+            <column name="REALM_ID" type="CHAR(36)">
                 <constraints nullable="false"/>
             </column>
             <column name="BRAND_ID" type="CHAR(36)">
