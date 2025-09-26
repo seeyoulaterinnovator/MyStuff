@@ -25,7 +25,7 @@
         </createTable>
     </changeSet>
 
-    <!-- 2. Создаём таблицу REALM_BRAND -->
+    <!-- 2. Создаём таблицу REALM_BRAND с синхронными типами -->
     <changeSet id="2025-09-17-2-create-realm-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -36,17 +36,23 @@
             <column name="ID" type="CHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="REALM_ID" type="VARCHAR(36)">
+            <!-- ТИП CHAR(36) под REALM.ID -->
+            <column name="REALM_ID" type="CHAR(36)">
                 <constraints nullable="false"/>
             </column>
+            <!-- ТИП CHAR(36) под BRAND.ID -->
             <column name="BRAND_ID" type="CHAR(36)">
                 <constraints nullable="false"/>
             </column>
             <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false"/>
         </createTable>
+        <!-- Принудительно задаём charset/collate -->
+        <modifySql dbms="mariadb">
+            <append value=" DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"/>
+        </modifySql>
     </changeSet>
 
-    <!-- 2.1 Добавляем FK на BRAND -->
+    <!-- 2.1 FK на BRAND -->
     <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="BRAND"/>
@@ -61,7 +67,7 @@
                                  referencedColumnNames="ID"/>
     </changeSet>
 
-    <!-- 2.2 Добавляем FK на REALM -->
+    <!-- 2.2 FK на REALM -->
     <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM"/>
@@ -69,6 +75,10 @@
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
             </not>
         </preConditions>
+        <!-- Перед FK гарантируем тип и collate -->
+        <sql>
+            ALTER TABLE REALM MODIFY ID CHAR (36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        </sql>
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
                                  constraintName="FK_REALM_BRAND_REALM"
