@@ -73,20 +73,6 @@
     </changeSet>
 
     <!-- 2.2 Добавляем FK на REALM -->
-    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="REALM"/>
-            <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
-            </not>
-        </preConditions>
-        <addForeignKeyConstraint baseTableName="REALM_BRAND"
-                                 baseColumnNames="REALM_ID"
-                                 constraintName="FK_REALM_BRAND_REALM"
-                                 referencedTableName="REALM"
-                                 referencedColumnNames="ID"/>
-    </changeSet>
-
     <changeSet id="2025-09-26-2b-12-42-fix-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM"/>
