@@ -44,6 +44,9 @@
             </column>
             <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false"/>
         </createTable>
+        <modifySql>
+            <append value=" DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"/>
+        </modifySql>
     </changeSet>
 
     <!-- 2.1 Добавляем FK на BRAND -->
