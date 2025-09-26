@@ -25,7 +25,7 @@
         </createTable>
     </changeSet>
 
-    <!-- 2. Создаём таблицу REALM_BRAND с синхронными типами -->
+    <!-- 2. Создаём таблицу REALM_BRAND -->
     <changeSet id="2025-09-17-2-create-realm-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -36,25 +36,20 @@
             <column name="ID" type="CHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <!-- ТИП CHAR(36) под REALM.ID -->
-            <column name="REALM_ID" type="CHAR(36)">
+            <column name="REALM_ID" type="VARCHAR(36)">
                 <constraints nullable="false"/>
             </column>
-            <!-- ТИП CHAR(36) под BRAND.ID -->
             <column name="BRAND_ID" type="CHAR(36)">
                 <constraints nullable="false"/>
             </column>
             <column name="IS_DEFAULT" type="BOOLEAN" defaultValueBoolean="false"/>
         </createTable>
-        <!-- Принудительно задаём charset/collate -->
-        <modifySql dbms="mariadb">
-            <append value=" DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"/>
-        </modifySql>
     </changeSet>
 
-    <!-- 2.1 FK на BRAND -->
+    <!-- 2.1 Добавляем FK на BRAND -->
     <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="BRAND"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
@@ -64,26 +59,31 @@
                                  baseColumnNames="BRAND_ID"
                                  constraintName="FK_REALM_BRAND_BRAND"
                                  referencedTableName="BRAND"
-                                 referencedColumnNames="ID"/>
+                                 referencedColumnNames="ID"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
     </changeSet>
 
-    <!-- 2.2 FK на REALM -->
-    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
+    <!-- 2.2 Универсальная правка REALM_ID и FK на REALM -->
+    <changeSet id="2025-09-26-2b-fix-realm-id-and-fk" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
-            <not>
-                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
-            </not>
         </preConditions>
-        <!-- Перед FK гарантируем тип и collate -->
-        <sql>
-            ALTER TABLE REALM MODIFY ID CHAR (36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-        </sql>
+
+        <!-- Приводим REALM_ID к VARCHAR(36) (если уже так — Liquibase просто пропустит) -->
+        <modifyDataType tableName="REALM_BRAND"
+                        columnName="REALM_ID"
+                        newDataType="VARCHAR(36)"/>
+
+        <!-- Добавляем внешний ключ на REALM -->
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
                                  constraintName="FK_REALM_BRAND_REALM"
                                  referencedTableName="REALM"
-                                 referencedColumnNames="ID"/>
+                                 referencedColumnNames="ID"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
     </changeSet>
 
     <!-- 3. Наполняем таблицу BRAND всеми брендами -->
