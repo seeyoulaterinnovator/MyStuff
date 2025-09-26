@@ -11,6 +11,7 @@
             <not>
                 <tableExists tableName="BRAND"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <createTable tableName="BRAND">
             <column name="ID" type="CHAR(36)">
@@ -31,6 +32,7 @@
             <not>
                 <tableExists tableName="REALM_BRAND"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <createTable tableName="REALM_BRAND">
             <column name="ID" type="CHAR(36)">
@@ -53,6 +55,7 @@
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="BRAND_ID"
@@ -68,6 +71,7 @@
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
@@ -149,6 +153,7 @@
             <sqlCheck expectedResult="1">SELECT COUNT(*)
                                          FROM REALM
                                          WHERE ID = 'ER-TELECOM'</sqlCheck>
+            <dbms type="mariadb"/>
         </preConditions>
         <insert tableName="REALM_BRAND">
             <column name="ID" value="660e8400-e29b-41d4-a716-446655440001"/>
@@ -163,6 +168,7 @@
             <sqlCheck expectedResult="1">SELECT COUNT(*)
                                          FROM REALM
                                          WHERE ID = 'user'</sqlCheck>
+            <dbms type="mariadb"/>
         </preConditions>
         <insert tableName="REALM_BRAND">
             <column name="ID" value="660e8400-e29b-41d4-a716-446655440002"/>
@@ -177,6 +183,7 @@
             <sqlCheck expectedResult="1">SELECT COUNT(*)
                                          FROM REALM
                                          WHERE ID = 'S-TELECOM'</sqlCheck>
+            <dbms type="mariadb"/>
         </preConditions>
         <insert tableName="REALM_BRAND">
             <column name="ID" value="660e8400-e29b-41d4-a716-446655440003"/>
@@ -190,7 +197,9 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">SELECT COUNT(*)
                                          FROM REALM
-                                         WHERE ID = 'novotelecom'</sqlCheck>
+                                         WHERE ID = 'novotelecom'
+            </sqlCheck>
+            <dbms type="mariadb"/>
         </preConditions>
         <insert tableName="REALM_BRAND">
             <column name="ID" value="660e8400-e29b-41d4-a716-446655440004"/>
@@ -212,6 +221,7 @@
                     <columnExists tableName="USER_LOGIN_HISTORY" columnName="BRAND_NAME"/>
                 </not>
             </or>
+            <dbms type="mariadb"/>
         </preConditions>
         <addColumn tableName="USER_LOGIN_HISTORY">
             <column name="BRAND_ID" type="CHAR(36)"/>
@@ -221,6 +231,9 @@
 
     <!-- 6. Проставляем markBrandId для всех пользователей без бренда -->
     <changeSet id="2025-09-17-6-assign-brand-to-users" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
         <sql>
             INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
             SELECT UUID(),
@@ -243,6 +256,7 @@
             <not>
                 <columnExists tableName="USER_POST" columnName="MARK_BRAND_ID"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <addColumn tableName="USER_POST">
             <column name="MARK_BRAND_ID" type="CHAR(36)"/>
@@ -261,6 +275,7 @@
             <not>
                 <columnExists tableName="IMPORT_USERS_DATA" columnName="MARK_BRAND_ID"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <addColumn tableName="IMPORT_USERS_DATA">
             <column name="MARK_BRAND_ID" type="CHAR(36)"/>
@@ -274,6 +289,9 @@
 
     <!-- 9. Обновляем пользователей по списку от BSS -->
     <changeSet id="2025-09-17-9-bss-tomsid-update" author="vakilev.aa" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mariadb"/>
+        </preConditions>
         <sqlFile path="sql/bss-tomsid-update.sql"
                  relativeToChangelogFile="true"
                  splitStatements="true"
@@ -286,6 +304,7 @@
             <tableExists tableName="USER_POST"/>
             <tableExists tableName="USER_ENTITY"/>
             <tableExists tableName="REALM_BRAND"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             UPDATE USER_POST up
@@ -303,6 +322,7 @@
             <tableExists tableName="IMPORT_USERS_DATA"/>
             <tableExists tableName="USER_ENTITY"/>
             <tableExists tableName="REALM_BRAND"/>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             UPDATE IMPORT_USERS_DATA iud
@@ -321,6 +341,7 @@
             <not>
                 <indexExists tableName="REALM_BRAND" indexName="UK_REALM_BRAND_REALM_BRAND"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <addUniqueConstraint tableName="REALM_BRAND"
                              columnNames="REALM_ID, BRAND_ID"
@@ -335,6 +356,7 @@
             <not>
                 <columnExists tableName="REALM_BRAND" columnName="DEFAULT_REALM_UNIQ"/>
             </not>
+            <dbms type="mariadb"/>
         </preConditions>
         <sql>
             ALTER TABLE REALM_BRAND
