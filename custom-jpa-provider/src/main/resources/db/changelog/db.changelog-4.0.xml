@@ -187,6 +187,12 @@
             <sqlCheck expectedResult="1">
                 SELECT COUNT(*) FROM REALM WHERE ID='ER-TELECOM';
             </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM REALM_BRAND
+                WHERE REALM_ID = 'ER-TELECOM'
+                AND BRAND_ID = '550e8400-e29b-41d4-a716-446655440001';
+            </sqlCheck>
         </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
@@ -201,6 +207,12 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
                 SELECT COUNT(*) FROM REALM WHERE ID='user';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM REALM_BRAND
+                WHERE REALM_ID = 'user'
+                  AND BRAND_ID = '550e8400-e29b-41d4-a716-446655440007';
             </sqlCheck>
         </preConditions>
         <sql>
@@ -217,6 +229,12 @@
             <sqlCheck expectedResult="1">
                 SELECT COUNT(*) FROM REALM WHERE ID='S-TELECOM';
             </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM REALM_BRAND
+                WHERE REALM_ID = 'S-TELECOM'
+                  AND BRAND_ID = '550e8400-e29b-41d4-a716-446655440011';
+            </sqlCheck>
         </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
@@ -231,6 +249,12 @@
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
                 SELECT COUNT(*) FROM REALM WHERE ID='novotelecom';
+            </sqlCheck>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM REALM_BRAND
+                WHERE REALM_ID = 'novotelecom'
+                  AND BRAND_ID = '550e8400-e29b-41d4-a716-446655440002';
             </sqlCheck>
         </preConditions>
         <sql>
