@@ -211,6 +211,10 @@ export default function EditUser() {
           },
           {} as Record<string, string>,
         );
+
+        markBrandId.annotations.defaultValue = realmBrands.find(
+          (realmBrand) => realmBrand.default,
+        )?.brandId;
       }
 
       setUserProfileMetadata(userProfileMetadata);

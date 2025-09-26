@@ -192,8 +192,9 @@ domru:stage5:
     NAMESPACE: 'sso'
     NODE_PORT: '30085'
     REPLICA_COUNT: '3'
-  only:
-    - itres # т.к. пока еше не обновлен
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
+    KC_CACHE_STACK: 'kubernetes'
+    KC_FEATURES: 'persistent-user-sessions'
 
 domru:perm-k8s:
   extends: .domru:prod:template
