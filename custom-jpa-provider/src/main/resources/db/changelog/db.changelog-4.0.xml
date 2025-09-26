@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!-- 1. Создаём таблицу BRAND -->
+    <!-- 1. BRAND -->
     <changeSet id="2025-09-17-1-create-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -22,7 +22,7 @@
         </sql>
     </changeSet>
 
-    <!-- 2. Создаём таблицу REALM_BRAND -->
+    <!-- 2. REALM_BRAND -->
     <changeSet id="2025-09-17-2-create-realm-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -40,20 +40,23 @@
         </sql>
     </changeSet>
 
-    <!-- 2.1 FK на BRAND -->
+    <!-- 2.1 FK -> BRAND -->
     <changeSet id="2025-09-17-2a-fk-brand" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <tableExists tableName="BRAND"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_BRAND"/>
             </not>
         </preConditions>
         <sql>
             ALTER TABLE REALM_BRAND
-                ADD CONSTRAINT FK_REALM_BRAND_BRAND FOREIGN KEY (BRAND_ID) REFERENCES BRAND (ID);
+                ADD CONSTRAINT FK_REALM_BRAND_BRAND
+                    FOREIGN KEY (BRAND_ID) REFERENCES BRAND (ID);
         </sql>
     </changeSet>
 
-    <!-- 2.2 Привести REALM_ID к VARCHAR(36), если REALM.ID = VARCHAR(36) -->
+    <!-- 2.2 Привести REALM_BRAND.REALM_ID к длине REALM.ID (36) -->
     <changeSet id="2025-09-26-fix-realm-id-36" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="36">
@@ -61,13 +64,13 @@
                 FROM information_schema.columns
                 WHERE table_name = 'REALM'
                   AND column_name = 'ID'
-                  AND table_schema = DATABASE();
+                  AND table_schema = DATABASE()
             </sqlCheck>
         </preConditions>
-        <modifyDataType tableName="REALM_BRAND" columnName="REALM_ID" newDataType="VARCHAR(36)"/>
+        <sql>ALTER TABLE REALM_BRAND MODIFY REALM_ID VARCHAR (36);</sql>
     </changeSet>
 
-    <!-- Привести REALM_ID к VARCHAR(64), если REALM.ID = VARCHAR(64) -->
+    <!-- Альтернатива: если вдруг REALM.ID = VARCHAR(64) -->
     <changeSet id="2025-09-26-fix-realm-id-64" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="64">
@@ -75,162 +78,242 @@
                 FROM information_schema.columns
                 WHERE table_name = 'REALM'
                   AND column_name = 'ID'
-                  AND table_schema = DATABASE();
+                  AND table_schema = DATABASE()
             </sqlCheck>
         </preConditions>
-        <modifyDataType tableName="REALM_BRAND" columnName="REALM_ID" newDataType="VARCHAR(64)"/>
+        <sql>ALTER TABLE REALM_BRAND MODIFY REALM_ID VARCHAR (64);</sql>
     </changeSet>
 
-    <!-- 2.3 FK на REALM -->
+    <!-- 2.3 FK -> REALM -->
     <changeSet id="2025-09-26-2c-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <tableExists tableName="REALM"/>
             <not>
                 <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
             </not>
         </preConditions>
         <sql>
             ALTER TABLE REALM_BRAND
-                ADD CONSTRAINT FK_REALM_BRAND_REALM FOREIGN KEY (REALM_ID) REFERENCES REALM (ID);
+                ADD CONSTRAINT FK_REALM_BRAND_REALM
+                    FOREIGN KEY (REALM_ID) REFERENCES REALM (ID);
         </sql>
     </changeSet>
 
-    <!-- 3. Наполняем таблицу BRAND -->
-    <changeSet id="2025-09-17-3-insert-brands" author="vakilev.aa" context="init-data">
+    <!-- 3. Наполнение BRAND (идемпотентно) -->
+    <changeSet id="2025-09-17-3-insert-brands" author="vakilev.aa">
         <sql>
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440001', '9154881443513193841', 'ЭР-Телеком Холдинг'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440001');
+            SELECT '550e8400-e29b-41d4-a716-446655440001',
+                   '9154881443513193841',
+                   'ЭР-Телеком Холдинг' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440001');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440002', '9161455007713625991', 'ООО «ЭР-Телеком Москва»'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440002');
+            SELECT '550e8400-e29b-41d4-a716-446655440002',
+                   '9161455007713625991',
+                   'ООО «ЭР-Телеком Москва»' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440002');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440003', '9169483311299030194', 'Дом.ру Бизнес / АКАДО'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440003');
+            SELECT '550e8400-e29b-41d4-a716-446655440003',
+                   '9169483311299030194',
+                   'Дом.ру Бизнес / АКАДО' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440003');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440004', '9170723516113770183', 'Дом.ру Бизнес /Ринет'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440004');
+            SELECT '550e8400-e29b-41d4-a716-446655440004',
+                   '9170723516113770183',
+                   'Дом.ру Бизнес /Ринет' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440004');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440005', '9171370895499846025', 'Дом.ру Бизнес | Авантел'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440005');
+            SELECT '550e8400-e29b-41d4-a716-446655440005',
+                   '9171370895499846025',
+                   'Дом.ру Бизнес | Авантел' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440005');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440006', '9171370898499846025', 'ЭР-Телеком | Авантел'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440006');
+            SELECT '550e8400-e29b-41d4-a716-446655440006',
+                   '9171370898499846025',
+                   'ЭР-Телеком | Авантел' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440006');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440007', '9154394142013178781', 'Дом.ру Бизнес'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440007');
+            SELECT '550e8400-e29b-41d4-a716-446655440007',
+                   '9154394142013178781',
+                   'Дом.ру Бизнес' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440007');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440008', '9154394142013178782', 'Энфорта'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440008');
+            SELECT '550e8400-e29b-41d4-a716-446655440008',
+                   '9154394142013178782',
+                   'Энфорта' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440008');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440009', '9154394142013178783', 'ВестКолл'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440009');
+            SELECT '550e8400-e29b-41d4-a716-446655440009',
+                   '9154394142013178783',
+                   'ВестКолл' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440009');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440010', '9154394142013178784', 'Деловая сеть – Иркутск'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440010');
+            SELECT '550e8400-e29b-41d4-a716-446655440010',
+                   '9154394142013178784',
+                   'Деловая сеть – Иркутск' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440010');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440011', '9154897929413180446', 'Электронный город Бизнес'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440011');
+            SELECT '550e8400-e29b-41d4-a716-446655440011',
+                   '9154897929413180446',
+                   'Электронный город Бизнес' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440011');
 
             INSERT INTO BRAND (ID, CODE, NAME)
-            SELECT '550e8400-e29b-41d4-a716-446655440012', '9161141698913290787', 'БИКС+'
-            FROM DUAL
-            WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID = '550e8400-e29b-41d4-a716-446655440012');
+            SELECT '550e8400-e29b-41d4-a716-446655440012',
+                   '9161141698913290787',
+                   'БИКС+' WHERE NOT EXISTS (SELECT 1 FROM BRAND WHERE ID='550e8400-e29b-41d4-a716-446655440012');
         </sql>
     </changeSet>
 
-    <!-- 4. Дефолтные бренды для реалмов -->
+    <!-- 4. Дефолтные бренды для реалмов (идемпотентно) -->
     <changeSet id="2025-09-17-4-insert-realm-brand-ertelecom" author="vakilev.aa">
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
-            SELECT '660e8400-e29b-41d4-a716-446655440001', 'ER-TELECOM', '550e8400-e29b-41d4-a716-446655440001', 1
-            FROM DUAL
-            WHERE EXISTS(SELECT 1 FROM REALM WHERE ID = 'ER-TELECOM');
+            SELECT '660e8400-e29b-41d4-a716-446655440001',
+                   'ER-TELECOM',
+                   '550e8400-e29b-41d4-a716-446655440001',
+                   1 WHERE EXISTS (SELECT 1 FROM REALM WHERE ID='ER-TELECOM')
+              AND NOT EXISTS (
+                    SELECT 1 FROM REALM_BRAND
+                    WHERE REALM_ID='ER-TELECOM' AND BRAND_ID='550e8400-e29b-41d4-a716-446655440001'
+              );
         </sql>
     </changeSet>
 
     <changeSet id="2025-09-17-4b-insert-realm-brand-user" author="vakilev.aa">
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
-            SELECT '660e8400-e29b-41d4-a716-446655440002', 'user', '550e8400-e29b-41d4-a716-446655440007', 1
-            FROM DUAL
-            WHERE EXISTS(SELECT 1 FROM REALM WHERE ID = 'user');
+            SELECT '660e8400-e29b-41d4-a716-446655440002',
+                   'user',
+                   '550e8400-e29b-41d4-a716-446655440007',
+                   1 WHERE EXISTS (SELECT 1 FROM REALM WHERE ID='user')
+              AND NOT EXISTS (
+                    SELECT 1 FROM REALM_BRAND
+                    WHERE REALM_ID='user' AND BRAND_ID='550e8400-e29b-41d4-a716-446655440007'
+              );
         </sql>
     </changeSet>
 
     <changeSet id="2025-09-17-4c-insert-realm-brand-stelecom" author="vakilev.aa">
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
-            SELECT '660e8400-e29b-41d4-a716-446655440003', 'S-TELECOM', '550e8400-e29b-41d4-a716-446655440011', 1
-            FROM DUAL
-            WHERE EXISTS(SELECT 1 FROM REALM WHERE ID = 'S-TELECOM');
+            SELECT '660e8400-e29b-41d4-a716-446655440003',
+                   'S-TELECOM',
+                   '550e8400-e29b-41d4-a716-446655440011',
+                   1 WHERE EXISTS (SELECT 1 FROM REALM WHERE ID='S-TELECOM')
+              AND NOT EXISTS (
+                    SELECT 1 FROM REALM_BRAND
+                    WHERE REALM_ID='S-TELECOM' AND BRAND_ID='550e8400-e29b-41d4-a716-446655440011'
+              );
         </sql>
     </changeSet>
 
     <changeSet id="2025-09-17-4d-insert-realm-brand-novotelecom" author="vakilev.aa">
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
-            SELECT '660e8400-e29b-41d4-a716-446655440004', 'novotelecom', '550e8400-e29b-41d4-a716-446655440002', 1
-            FROM DUAL
-            WHERE EXISTS(SELECT 1 FROM REALM WHERE ID = 'novotelecom');
+            SELECT '660e8400-e29b-41d4-a716-446655440004',
+                   'novotelecom',
+                   '550e8400-e29b-41d4-a716-446655440002',
+                   1 WHERE EXISTS (SELECT 1 FROM REALM WHERE ID='novotelecom')
+              AND NOT EXISTS (
+                    SELECT 1 FROM REALM_BRAND
+                    WHERE REALM_ID='novotelecom' AND BRAND_ID='550e8400-e29b-41d4-a716-446655440002'
+              );
         </sql>
     </changeSet>
 
-    <!-- 5. Поля в USER_LOGIN_HISTORY -->
-    <changeSet id="2025-09-17-5-add-brand-to-login-history" author="vakilev.aa">
-        <sql>
-            ALTER TABLE USER_LOGIN_HISTORY
-                ADD COLUMN IF NOT EXISTS BRAND_ID CHAR (36),
-                ADD COLUMN IF NOT EXISTS BRAND_NAME VARCHAR (255);
-        </sql>
+    <!-- 5. USER_LOGIN_HISTORY: BRAND_ID -->
+    <changeSet id="2025-09-17-5a-add-brand-id-to-ULH" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+            <not>
+                <columnExists tableName="USER_LOGIN_HISTORY" columnName="BRAND_ID"/>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE USER_LOGIN_HISTORY
+            ADD COLUMN BRAND_ID CHAR(36);</sql>
     </changeSet>
 
-    <!-- 6. Проставляем markBrandId -->
+    <!-- 5b. USER_LOGIN_HISTORY: BRAND_NAME -->
+    <changeSet id="2025-09-17-5b-add-brand-name-to-ULH" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_LOGIN_HISTORY"/>
+            <not>
+                <columnExists tableName="USER_LOGIN_HISTORY" columnName="BRAND_NAME"/>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE USER_LOGIN_HISTORY
+            ADD COLUMN BRAND_NAME VARCHAR(255);</sql>
+    </changeSet>
+
+    <!-- 6. Проставляем markBrandId пользователям -->
     <changeSet id="2025-09-17-6-assign-brand-to-users" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_ENTITY"/>
+            <tableExists tableName="USER_ATTRIBUTE"/>
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
         <sql>
             INSERT INTO USER_ATTRIBUTE (id, name, value, user_id)
             SELECT UUID(), 'markBrandId', rb.BRAND_ID, u.id
             FROM USER_ENTITY u
                      JOIN REALM_BRAND rb ON rb.REALM_ID = u.REALM_ID AND rb.IS_DEFAULT = 1
-            WHERE NOT EXISTS (SELECT 1 FROM USER_ATTRIBUTE a WHERE a.user_id = u.id AND a.name = 'markBrandId');
+            WHERE NOT EXISTS (SELECT 1
+                              FROM USER_ATTRIBUTE a
+                              WHERE a.user_id = u.id
+                                AND a.name = 'markBrandId');
         </sql>
     </changeSet>
 
-    <!-- 7. MARK_BRAND_ID для USER_POST -->
-    <changeSet id="2025-09-17-7-add-markBrandId-to-user-post" author="vakilev.aa">
+    <!-- 7. USER_POST: MARK_BRAND_ID + FK -->
+    <changeSet id="2025-09-17-7a-add-markBrandId-to-user-post" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+            <not>
+                <columnExists tableName="USER_POST" columnName="MARK_BRAND_ID"/>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE USER_POST
+            ADD COLUMN MARK_BRAND_ID CHAR(36);</sql>
+    </changeSet>
+    <changeSet id="2025-09-17-7b-fk-user-post-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+            <tableExists tableName="BRAND"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_USER_POST_BRAND"/>
+            </not>
+        </preConditions>
         <sql>
             ALTER TABLE USER_POST
-                ADD COLUMN IF NOT EXISTS MARK_BRAND_ID CHAR (36),
-                ADD CONSTRAINT FK_USER_POST_BRAND FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND(ID);
+                ADD CONSTRAINT FK_USER_POST_BRAND
+                    FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND (ID);
         </sql>
     </changeSet>
 
-    <!-- 8. MARK_BRAND_ID для IMPORT_USERS_DATA -->
-    <changeSet id="2025-09-17-8-add-markBrandId-to-import-users-data" author="vakilev.aa">
+    <!-- 8. IMPORT_USERS_DATA: MARK_BRAND_ID + FK -->
+    <changeSet id="2025-09-17-8a-add-markBrandId-to-import-users-data" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <not>
+                <columnExists tableName="IMPORT_USERS_DATA" columnName="MARK_BRAND_ID"/>
+            </not>
+        </preConditions>
+        <sql>ALTER TABLE IMPORT_USERS_DATA
+            ADD COLUMN MARK_BRAND_ID CHAR(36);</sql>
+    </changeSet>
+    <changeSet id="2025-09-17-8b-fk-import-users-data-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <tableExists tableName="BRAND"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_IMPORT_USERS_DATA_BRAND"/>
+            </not>
+        </preConditions>
         <sql>
             ALTER TABLE IMPORT_USERS_DATA
-                ADD COLUMN IF NOT EXISTS MARK_BRAND_ID CHAR (36),
-                ADD CONSTRAINT FK_IMPORT_USERS_DATA_BRAND FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND(ID);
+                ADD CONSTRAINT FK_IMPORT_USERS_DATA_BRAND
+                    FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND (ID);
         </sql>
     </changeSet>
 
@@ -244,6 +327,11 @@
 
     <!-- 10. Синхронизация USER_POST -->
     <changeSet id="2025-09-17-10-userpost-brand-sync" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="USER_POST"/>
+            <tableExists tableName="USER_ENTITY"/>
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
         <sql>
             UPDATE USER_POST up
                 JOIN USER_ENTITY ue
@@ -256,6 +344,11 @@
 
     <!-- 11. Синхронизация IMPORT_USERS_DATA -->
     <changeSet id="2025-09-18-11-import-users-data-brand-sync" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="IMPORT_USERS_DATA"/>
+            <tableExists tableName="USER_ENTITY"/>
+            <tableExists tableName="REALM_BRAND"/>
+        </preConditions>
         <sql>
             UPDATE IMPORT_USERS_DATA iud
                 JOIN USER_ENTITY ue
@@ -266,21 +359,45 @@
         </sql>
     </changeSet>
 
-    <!-- 12. Уникальная связка REALM↔BRAND -->
+    <!-- 12. Уникальность (REALM_ID, BRAND_ID) -->
     <changeSet id="2025-09-18-12-uniq-realm-brand" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <not>
+                <indexExists tableName="REALM_BRAND" indexName="UK_REALM_BRAND_REALM_BRAND"/>
+            </not>
+        </preConditions>
         <sql>
             ALTER TABLE REALM_BRAND
-                ADD UNIQUE INDEX IF NOT EXISTS UK_REALM_BRAND_REALM_BRAND (REALM_ID,BRAND_ID);
+                ADD CONSTRAINT UK_REALM_BRAND_REALM_BRAND UNIQUE (REALM_ID, BRAND_ID);
         </sql>
     </changeSet>
 
-    <!-- 13. Один дефолтный бренд -->
-    <changeSet id="2025-09-18-13-one-default-per-realm" author="vakilev.aa">
+    <!-- 13. Ровно один дефолтный бренд на REALM -->
+    <changeSet id="2025-09-18-13a-add-default-realm-uniq-column" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <not>
+                <columnExists tableName="REALM_BRAND" columnName="DEFAULT_REALM_UNIQ"/>
+            </not>
+        </preConditions>
         <sql>
             ALTER TABLE REALM_BRAND
-                ADD COLUMN IF NOT EXISTS DEFAULT_REALM_UNIQ VARCHAR (64)
-                GENERATED ALWAYS AS (CASE WHEN IS_DEFAULT=1 THEN REALM_ID ELSE NULL END) VIRTUAL,
-                ADD UNIQUE INDEX IF NOT EXISTS UK_REALM_BRAND_DEFAULT (DEFAULT_REALM_UNIQ);
+                ADD COLUMN DEFAULT_REALM_UNIQ VARCHAR(64)
+                    GENERATED ALWAYS AS (CASE WHEN IS_DEFAULT = 1 THEN REALM_ID ELSE NULL END) VIRTUAL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="2025-09-18-13b-one-default-per-realm-index" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <not>
+                <indexExists tableName="REALM_BRAND" indexName="UK_REALM_BRAND_DEFAULT"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE REALM_BRAND
+                ADD UNIQUE INDEX UK_REALM_BRAND_DEFAULT (DEFAULT_REALM_UNIQ);
         </sql>
     </changeSet>
 
