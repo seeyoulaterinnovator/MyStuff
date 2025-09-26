@@ -1,4 +1,0 @@
-DROP PROCEDURE IF EXISTS safe_drop_index;
-DROP PROCEDURE IF EXISTS safe_drop_fk;
-DROP PROCEDURE IF EXISTS safe_drop_column;
-DROP PROCEDURE IF EXISTS safe_drop_table;

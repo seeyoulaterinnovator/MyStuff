@@ -5,14 +5,92 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="2025-09-26-create-utils" author="vakilev.aa" runAlways="true">
-        <preConditions onFail="MARK_RAN">
-            <dbms type="mariadb"/>
-        </preConditions>
-        <sqlFile path="sql/create-utils.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="false"
-                 endDelimiter="$$"/>
+    <changeSet id="2025-09-26-create-utils-1" author="vakilev.aa" runAlways="true">
+        <sql splitStatements="false">
+            CREATE PROCEDURE safe_drop_index(IN tbl VARCHAR(64), IN idx VARCHAR(64))
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.statistics
+                    WHERE table_schema = DATABASE()
+                      AND table_name = tbl
+                      AND index_name = idx
+                ) THEN
+                    SET @s = CONCAT('ALTER TABLE ', tbl, ' DROP INDEX ', idx);
+            PREPARE stmt FROM @s;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            END IF;
+            END;
+        </sql>
+        <rollback>
+            DROP PROCEDURE IF EXISTS safe_drop_index;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2025-09-26-create-utils-2" author="vakilev.aa" runAlways="true">
+        <sql splitStatements="false">
+            CREATE PROCEDURE safe_drop_fk(IN tbl VARCHAR(64), IN fk VARCHAR(64))
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.table_constraints
+                    WHERE table_schema = DATABASE()
+                      AND table_name = tbl
+                      AND constraint_name = fk
+                      AND constraint_type = 'FOREIGN KEY'
+                ) THEN
+                    SET @s = CONCAT('ALTER TABLE ', tbl, ' DROP FOREIGN KEY ', fk);
+            PREPARE stmt FROM @s;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            END IF;
+            END;
+        </sql>
+        <rollback>
+            DROP PROCEDURE IF EXISTS safe_drop_fk;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2025-09-26-create-utils-3" author="vakilev.aa" runAlways="true">
+        <sql splitStatements="false">
+            CREATE PROCEDURE safe_drop_column(IN tbl VARCHAR(64), IN col VARCHAR(64))
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = DATABASE()
+                      AND table_name = tbl
+                      AND column_name = col
+                ) THEN
+                    SET @s = CONCAT('ALTER TABLE ', tbl, ' DROP COLUMN ', col);
+            PREPARE stmt FROM @s;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            END IF;
+            END;
+        </sql>
+        <rollback>
+            DROP PROCEDURE IF EXISTS safe_drop_column;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2025-09-26-create-utils-4" author="vakilev.aa" runAlways="true">
+        <sql splitStatements="false">
+            CREATE PROCEDURE safe_drop_table(IN tbl VARCHAR(64))
+            BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = DATABASE()
+                      AND table_name = tbl
+                ) THEN
+                    SET @s = CONCAT('DROP TABLE ', tbl);
+            PREPARE stmt FROM @s;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+            END IF;
+            END;
+        </sql>
+        <rollback>
+            DROP PROCEDURE IF EXISTS safe_drop_table;
+        </rollback>
     </changeSet>
 
     <!-- 1. Создаём таблицу BRAND -->
@@ -105,6 +183,11 @@
 
     <!-- 4. Дефолтные бренды для реалмов -->
     <changeSet id="2025-09-17-4-insert-realm-brand-ertelecom" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM REALM WHERE ID='ER-TELECOM';
+            </sqlCheck>
+        </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
             VALUES ('660e8400-e29b-41d4-a716-446655440001', 'ER-TELECOM', '550e8400-e29b-41d4-a716-446655440001', 1);
@@ -115,6 +198,11 @@
     </changeSet>
 
     <changeSet id="2025-09-17-4b-insert-realm-brand-user" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM REALM WHERE ID='user';
+            </sqlCheck>
+        </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
             VALUES ('660e8400-e29b-41d4-a716-446655440002', 'user', '550e8400-e29b-41d4-a716-446655440007', 1);
@@ -125,6 +213,11 @@
     </changeSet>
 
     <changeSet id="2025-09-17-4c-insert-realm-brand-stelecom" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM REALM WHERE ID='S-TELECOM';
+            </sqlCheck>
+        </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
             VALUES ('660e8400-e29b-41d4-a716-446655440003', 'S-TELECOM', '550e8400-e29b-41d4-a716-446655440011', 1);
@@ -135,6 +228,11 @@
     </changeSet>
 
     <changeSet id="2025-09-17-4d-insert-realm-brand-novotelecom" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM REALM WHERE ID='novotelecom';
+            </sqlCheck>
+        </preConditions>
         <sql>
             INSERT INTO REALM_BRAND (ID, REALM_ID, BRAND_ID, IS_DEFAULT)
             VALUES ('660e8400-e29b-41d4-a716-446655440004', 'novotelecom', '550e8400-e29b-41d4-a716-446655440002', 1);
@@ -179,8 +277,8 @@
                 ADD CONSTRAINT FK_USER_POST_BRAND FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND(ID);
         </sql>
         <rollback>
-            ALTER TABLE USER_POST DROP FOREIGN KEY IF EXISTS FK_USER_POST_BRAND;
-            ALTER TABLE USER_POST DROP COLUMN IF EXISTS MARK_BRAND_ID;
+            CALL safe_drop_fk('USER_POST', 'FK_USER_POST_BRAND');
+            CALL safe_drop_column('USER_POST', 'MARK_BRAND_ID');
         </rollback>
     </changeSet>
 
@@ -192,8 +290,8 @@
                 ADD CONSTRAINT FK_IMPORT_USERS_DATA_BRAND FOREIGN KEY (MARK_BRAND_ID) REFERENCES BRAND(ID);
         </sql>
         <rollback>
-            ALTER TABLE IMPORT_USERS_DATA DROP FOREIGN KEY IF EXISTS FK_IMPORT_USERS_DATA_BRAND;
-            ALTER TABLE IMPORT_USERS_DATA DROP COLUMN IF EXISTS MARK_BRAND_ID;
+            CALL safe_drop_fk('IMPORT_USERS_DATA', 'FK_IMPORT_USERS_DATA_BRAND');
+            CALL safe_drop_column('IMPORT_USERS_DATA', 'MARK_BRAND_ID');
         </rollback>
     </changeSet>
 
@@ -265,9 +363,12 @@
     </changeSet>
 
     <changeSet id="2025-09-26-drop-utils" author="vakilev.aa" runAlways="true">
-        <sqlFile path="sql/drop-utils.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="true"/>
+        <sql>
+            DROP PROCEDURE IF EXISTS safe_drop_index;
+            DROP PROCEDURE IF EXISTS safe_drop_fk;
+            DROP PROCEDURE IF EXISTS safe_drop_column;
+            DROP PROCEDURE IF EXISTS safe_drop_table;
+        </sql>
     </changeSet>
 
 </databaseChangeLog>
