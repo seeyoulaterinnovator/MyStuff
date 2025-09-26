@@ -393,6 +393,9 @@
             DROP PROCEDURE IF EXISTS safe_drop_column;
             DROP PROCEDURE IF EXISTS safe_drop_table;
         </sql>
+        <rollback>
+            -- Nothing to rollback
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
