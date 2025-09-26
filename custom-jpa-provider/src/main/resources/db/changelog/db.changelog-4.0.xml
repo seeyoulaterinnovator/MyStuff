@@ -59,31 +59,50 @@
                                  baseColumnNames="BRAND_ID"
                                  constraintName="FK_REALM_BRAND_BRAND"
                                  referencedTableName="BRAND"
-                                 referencedColumnNames="ID"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"/>
+                                 referencedColumnNames="ID"/>
     </changeSet>
 
-    <!-- 2.2 Универсальная правка REALM_ID и FK на REALM -->
-    <changeSet id="2025-09-26-2b-fix-realm-id-and-fk" author="vakilev.aa">
+    <!-- 2.2 Приводим REALM_ID к типу и кодировке REALM.ID, затем добавляем FK -->
+    <changeSet id="2025-09-17-2b-fk-realm" author="vakilev.aa">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="REALM_BRAND"/>
             <tableExists tableName="REALM"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
+            </not>
         </preConditions>
-
-        <!-- Приводим REALM_ID к VARCHAR(36) (если уже так — Liquibase просто пропустит) -->
+        <!-- Приводим REALM_ID к типу varchar(36) и utf8mb4 -->
         <modifyDataType tableName="REALM_BRAND"
                         columnName="REALM_ID"
                         newDataType="VARCHAR(36)"/>
-
-        <!-- Добавляем внешний ключ на REALM -->
+        <sql>ALTER TABLE REALM_BRAND CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;</sql>
+        <!-- Добавляем сам FK -->
         <addForeignKeyConstraint baseTableName="REALM_BRAND"
                                  baseColumnNames="REALM_ID"
                                  constraintName="FK_REALM_BRAND_REALM"
                                  referencedTableName="REALM"
-                                 referencedColumnNames="ID"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"/>
+                                 referencedColumnNames="ID"/>
+    </changeSet>
+
+
+    <changeSet id="2025-09-27-2b-fk-realm-fix" author="vakilev.aa">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="REALM_BRAND"/>
+            <tableExists tableName="REALM"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_REALM_BRAND_REALM"/>
+            </not>
+        </preConditions>
+
+        <!-- Исправляем тип REALM_ID, если вдруг отличается -->
+        <modifyDataType tableName="REALM_BRAND" columnName="REALM_ID" newDataType="VARCHAR(36)"/>
+
+        <!-- Добавляем внешний ключ -->
+        <addForeignKeyConstraint baseTableName="REALM_BRAND"
+                                 baseColumnNames="REALM_ID"
+                                 constraintName="FK_REALM_BRAND_REALM"
+                                 referencedTableName="REALM"
+                                 referencedColumnNames="ID"/>
     </changeSet>
 
     <!-- 3. Наполняем таблицу BRAND всеми брендами -->
@@ -353,5 +372,4 @@
           ADD UNIQUE INDEX UK_REALM_BRAND_DEFAULT (DEFAULT_REALM_UNIQ);
         </sql>
     </changeSet>
-
 </databaseChangeLog>
