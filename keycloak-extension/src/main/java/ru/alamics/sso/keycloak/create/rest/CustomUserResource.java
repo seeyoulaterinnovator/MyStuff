@@ -1,7 +1,6 @@
 package ru.alamics.sso.keycloak.create.rest;
 
 import jakarta.activation.UnsupportedDataTypeException;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -40,7 +39,6 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 import org.keycloak.utils.ProfileHelper;
 import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
-import ru.alamics.sso.jpa.repository.BrandRepository;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.exception.UserNotFoundException;
 import ru.alamics.sso.keycloak.facade.CustomerRequestService;
@@ -50,6 +48,7 @@ import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.registration.service.BrandService;
 import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportReportService;
@@ -84,8 +83,7 @@ public class CustomUserResource {
     private final RealmModel realm;
     protected KeycloakSession session;
     private CustomerRequestService customerRequestService;
-    @Inject
-    BrandRepository brandRepository;
+    private final BrandService brandService;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
@@ -95,6 +93,7 @@ public class CustomUserResource {
         this.importReportService = Lookup.lookup(ImportReportService.class);
         this.validateService = Lookup.lookup(ValidateService.class);
         this.customerRequestService = Lookup.lookup(CustomerRequestService.class);
+        this.brandService = Lookup.lookup(BrandService.class);
         this.realm = session.getContext().getRealm();
     }
 
@@ -157,12 +156,17 @@ public class CustomUserResource {
     private Response getUserResponse(UserRequest request, boolean bss) {
         try {
             UserModel user = userService.createUser(request, bss);
-            if (request.getMarkBrandId() != null) {
-                user.setSingleAttribute("markBrandId", request.getMarkBrandId());
+            String markBrandId = request.getMarkBrandId();
+            if (markBrandId == null && request.getBrand() != null) {
+                markBrandId = request.getBrand().getMarkBrandId();
+            }
+
+            if (markBrandId != null) {
+                user.setSingleAttribute("markBrandId", markBrandId);
             } else {
-                brandRepository.findDefaultByRealm(realm.getId())
+                brandService.getDefaultBrandByRealm(realm.getId())
                         .map(BrandEntity::getId)
-                        .ifPresent(defaultBrandId -> user.setSingleAttribute("markBrandId", defaultBrandId));
+                        .ifPresent(defaultBrandById -> user.setSingleAttribute("markBrandId", defaultBrandById));
             }
             customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.success()
@@ -674,7 +678,7 @@ public class CustomUserResource {
         rep.put("markBrandId", brandId);
 
         if (brandId != null) {
-            brandRepository.findById(brandId).ifPresent(brand -> rep.put("brand", brand.getName()));
+            brandService.getBrandById(brandId).ifPresent(brand -> rep.put("brand", brand.getName()));
         }
 
         return Response.ok(rep).build();

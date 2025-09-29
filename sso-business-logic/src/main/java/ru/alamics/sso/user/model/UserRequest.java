@@ -16,4 +16,5 @@ public class UserRequest implements Serializable {
     private String tomsId;
     private String markBrandId;
     private Long roleId;
+    private BrandRequest brand;
 }
