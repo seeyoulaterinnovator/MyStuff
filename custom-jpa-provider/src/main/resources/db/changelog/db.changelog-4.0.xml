@@ -319,19 +319,19 @@
         </rollback>
     </changeSet>
 
-    <!-- 9. BSS update -->
-    <changeSet id="2025-09-17-9-bss-tomsid-update" author="vakilev.aa" runOnChange="true">
-        <sqlFile path="sql/bss-tomsid-update.sql"
-                 relativeToChangelogFile="true"
-                 splitStatements="true"
-                 stripComments="true"/>
-        <rollback>
-            <sqlFile path="sql/bss-tomsid-rollback.sql"
-                     relativeToChangelogFile="true"
-                     splitStatements="true"
-                     stripComments="true"/>
-        </rollback>
-    </changeSet>
+<!--    &lt;!&ndash; 9. BSS update &ndash;&gt; DEV ONLY -->
+<!--    <changeSet id="2025-09-17-9-bss-tomsid-update" author="vakilev.aa" runOnChange="true">-->
+<!--        <sqlFile path="sql/bss-tomsid-update.sql"-->
+<!--                 relativeToChangelogFile="true"-->
+<!--                 splitStatements="true"-->
+<!--                 stripComments="true"/>-->
+<!--        <rollback>-->
+<!--            <sqlFile path="sql/bss-tomsid-rollback.sql"-->
+<!--                     relativeToChangelogFile="true"-->
+<!--                     splitStatements="true"-->
+<!--                     stripComments="true"/>-->
+<!--        </rollback>-->
+<!--    </changeSet>-->
 
     <!-- 10. Синхронизация USER_POST -->
     <changeSet id="2025-09-17-10-userpost-brand-sync" author="vakilev.aa">
