@@ -25,6 +25,7 @@ import { CustomConfig } from "./resources/custom/customConfig.js";
 import { CustomMessenger } from "./resources/custom/messengers.js";
 import { CustomClients } from "./resources/custom/customClients.js";
 import { CustomCache } from "./resources/custom/customCache.js";
+import { CustomBrands } from "./resources/custom/customBrands.js";
 
 export interface TokenProvider {
   getAccessToken: () => Promise<string | undefined>;
@@ -63,6 +64,7 @@ export class KeycloakAdminClient {
   public customMessenger: CustomMessenger;
   public customClients: CustomClients;
   public customCache: CustomCache;
+  public customBrands: CustomBrands;
 
   // Members
   public baseUrl: string;
@@ -106,6 +108,7 @@ export class KeycloakAdminClient {
     this.customMessenger = new CustomMessenger(this);
     this.customClients = new CustomClients(this);
     this.customCache = new CustomCache(this);
+    this.customBrands = new CustomBrands(this);
   }
 
   public async auth(credentials: Credentials) {

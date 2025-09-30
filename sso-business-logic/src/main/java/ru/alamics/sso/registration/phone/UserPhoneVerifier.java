@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import ru.alamics.sso.registration.model.AuthContext;
 import ru.alamics.sso.registration.model.User;
@@ -113,9 +112,8 @@ public class UserPhoneVerifier {
         if (!ActivationCodeType.CODE_TO_EMAIL.equals(activationCodeType)) {
             user.setPhoneVerifiedOn(LocalDateTime.now());
         }
-        UserEntity userEntity = new UserEntity();
-        userEntity.setId(user.getId());
-        loginHistory.createSuccessAuth(userEntity, realm);
+        loginHistory.createSuccessAuth(userModel, realm);
+
         String clientId = authSession.getClient().getClientId();
         authorisedUsersService.saveSuccessfulAuth(userModel, user, authSession.getRealm().getId(), clientId,typeId);
     }

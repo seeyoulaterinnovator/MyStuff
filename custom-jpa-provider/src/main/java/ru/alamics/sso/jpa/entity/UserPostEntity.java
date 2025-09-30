@@ -32,6 +32,10 @@ public class UserPostEntity {
     @Column(name = "dmp_id")
     private String dmpId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MARK_BRAND_ID", nullable = false)
+    private BrandEntity brand;
+
     @ManyToOne(targetEntity = UserPostRoleEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private UserPostRoleEntity role;
@@ -69,6 +73,7 @@ public class UserPostEntity {
         if (user != null ? !user.equals(userPost.user) : userPost.user != null) return false;
         if (customer != null ? !customer.equals(userPost.customer) : userPost.customer != null) return false;
         if (dmpId != null ? !dmpId.equals(userPost.dmpId) : userPost.dmpId != null) return false;
+        if (brand != null ? !brand.equals(userPost.brand) : userPost.brand != null) return false;
         return role != null ? role.equals(userPost.role) : userPost.role == null;
     }
 
@@ -78,6 +83,7 @@ public class UserPostEntity {
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (customer != null ? customer.hashCode() : 0);
         result = 31 * result + (dmpId != null ? dmpId.hashCode() : 0);
+        result = 31 * result + (brand != null ? brand.hashCode() : 0);
         result = 31 * result + (role != null ? role.hashCode() : 0);
         return result;
     }

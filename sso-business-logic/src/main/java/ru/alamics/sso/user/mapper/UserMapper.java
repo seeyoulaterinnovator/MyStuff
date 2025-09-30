@@ -49,6 +49,7 @@ public class UserMapper {
                 .enabled(toBoolean(tuple.get("enabled")))
                 .userPostId(toString(tuple.get("user_post_id")))
                 .tomsId(toString(tuple.get("toms_id")))
+                .markBrandId(toString(tuple.get("mark_brand_id")))
                 .organization(toString(tuple.get("org")))
                 .dmpId(toString(tuple.get("dmp_id")))
                 .roleId(toString(tuple.get("role_id")))
@@ -127,16 +128,11 @@ public class UserMapper {
                 for (int j = i + 1; j < userDtos.size(); j++) {
                     UserSearchDto userDtoJ = userDtos.get(j);
                     if (userPostId.equals(userDtoJ.getUserPostId()) && userDto.getId().equals(userDtoJ.getId()) && userDtoJ.getSystemName() != null && !userDtoJ.getSystemName().isEmpty()) {
-
-                        if (userDtoJ.getSystemName() != null) {
-
-                            if (sysNames.length() > 0)
-                                sysNames.append(", ");
-
-                            sysNames.append(userDtoJ.getSystemName());
-                            userDtos.remove(j);
-                            j--;
-                        }
+                        if (!sysNames.isEmpty())
+                            sysNames.append(", ");
+                        sysNames.append(userDtoJ.getSystemName());
+                        userDtos.remove(j);
+                        j--;
                     }
                 }
                 userDto.setSystemName(sysNames.toString());
@@ -200,6 +196,7 @@ public class UserMapper {
         userRequest.setPhone(importUsersDataEntity.getPhone());
         userRequest.setTomsId(importUsersDataEntity.getTomsId());
         userRequest.setDmpId(importUsersDataEntity.getDmpId());
+        userRequest.setMarkBrandId(importUsersDataEntity.getMarkBrandId());
         return userRequest;
     }
 

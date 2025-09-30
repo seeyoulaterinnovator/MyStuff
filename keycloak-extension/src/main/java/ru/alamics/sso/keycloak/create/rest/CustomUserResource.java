@@ -37,6 +37,7 @@ import org.keycloak.services.resources.account.AccountRestService;
 import org.keycloak.services.resources.admin.*;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.utils.ProfileHelper;
+import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.model.CustomUserAdapter;
 import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.exception.UserNotFoundException;
@@ -47,6 +48,7 @@ import ru.alamics.sso.keycloak.util.MiscUtil;
 import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
+import ru.alamics.sso.registration.service.BrandService;
 import ru.alamics.sso.service.ValidateService;
 import ru.alamics.sso.user.FileServiceException;
 import ru.alamics.sso.user.ImportReportService;
@@ -81,6 +83,7 @@ public class CustomUserResource {
     private final RealmModel realm;
     protected KeycloakSession session;
     private CustomerRequestService customerRequestService;
+    private final BrandService brandService;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
         this.session = session;
@@ -90,6 +93,7 @@ public class CustomUserResource {
         this.importReportService = Lookup.lookup(ImportReportService.class);
         this.validateService = Lookup.lookup(ValidateService.class);
         this.customerRequestService = Lookup.lookup(CustomerRequestService.class);
+        this.brandService = Lookup.lookup(BrandService.class);
         this.realm = session.getContext().getRealm();
     }
 
@@ -143,6 +147,7 @@ public class CustomUserResource {
     private boolean validateEmail(String email) {
         return Pattern.matches(Util.REGEX_EMAIL, email);
     }
+
     private boolean validatePhone(String phone) {
         return (phone.startsWith("+(7)9") && phone.length() == 14 && phone.substring(4).matches("[\\d]+"))
                 || (phone.startsWith("7") && phone.length() == 11 && phone.matches("[\\d]+"));
@@ -151,6 +156,18 @@ public class CustomUserResource {
     private Response getUserResponse(UserRequest request, boolean bss) {
         try {
             UserModel user = userService.createUser(request, bss);
+            String markBrandId = request.getMarkBrandId();
+            if (markBrandId == null && request.getBrand() != null) {
+                markBrandId = request.getBrand().getMarkBrandId();
+            }
+
+            if (markBrandId != null) {
+                user.setSingleAttribute("markBrandId", markBrandId);
+            } else {
+                brandService.getDefaultBrandByRealm(realm.getId())
+                        .map(BrandEntity::getId)
+                        .ifPresent(defaultBrandById -> user.setSingleAttribute("markBrandId", defaultBrandById));
+            }
             customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
@@ -205,7 +222,7 @@ public class CustomUserResource {
     public Response uploadUsers(MultipartFormDataInput input) {
         try {
             FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
-            if(formValue != null) {
+            if (formValue != null) {
                 return JsonResponse.success()
                         .addResult(
                                 "import-report",
@@ -293,7 +310,7 @@ public class CustomUserResource {
     public Response uploadImportUsersFile(MultipartFormDataInput input) {
         try {
             FormValue formValue = input.getValues().get("file").stream().findFirst().orElse(null);
-            if(formValue != null) {
+            if (formValue != null) {
                 userService.uploadImportUsersFile(
                         formValue.getFileItem().getInputStream(),
                         formValue.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
@@ -408,7 +425,7 @@ public class CustomUserResource {
 
         CustomUserAdapter user;
         UserModel userModel = session.getProvider(UserProvider.class).getUserById(realm, id);
-        if(userModel instanceof CustomUserAdapter) {
+        if (userModel instanceof CustomUserAdapter) {
             user = (CustomUserAdapter) userModel;
         } else {
             throw new InternalServerErrorException();
@@ -644,6 +661,29 @@ public class CustomUserResource {
         }
     }
 
+    @GET
+    @Path("users/{id}/with-brand")
+    @Produces(MediaType.APPLICATION_JSON)
+    @NoCache
+    public Response getUserWithBrand(@PathParam("id") String id) {
+        UserModel user = session.users().getUserById(realm, id);
+        if (user == null) throw new NotFoundException("User not found");
+
+        Map<String, Object> rep = new HashMap<>();
+        rep.put("id", user.getId());
+        rep.put("username", user.getUsername());
+        rep.put("email", user.getEmail());
+
+        String brandId = user.getFirstAttribute("markBrandId");
+        rep.put("markBrandId", brandId);
+
+        if (brandId != null) {
+            brandService.getBrandById(brandId).ifPresent(brand -> rep.put("brand", brand.getName()));
+        }
+
+        return Response.ok(rep).build();
+    }
+
     private void clearUserCache(KeycloakSession session) {
         UserCache cache = session.getProvider(UserCache.class);
         if (cache != null) {
@@ -652,7 +692,7 @@ public class CustomUserResource {
     }
 
     private CustomUserAdapter checkUser(String userId) {
-        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+        if (!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
                 && !GeneralRealm.MANAGER_REALMS.contains(auth.adminAuth().getRealm().getName())) {
             throw new ForbiddenException();
         }
@@ -661,9 +701,9 @@ public class CustomUserResource {
 
         if (user == null) throw new UserNotFoundException();
 
-        if(!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
+        if (!(user instanceof CustomUserAdapter customUser)) throw new InternalServerErrorException();
 
-        if(!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
+        if (!auth.adminAuth().getRealm().getName().equals(Config.getAdminRealm())
                 && customUser.getRealm().getName().equals(Config.getAdminRealm())) {
             throw new ForbiddenException();
         }
@@ -673,7 +713,7 @@ public class CustomUserResource {
     private RealmModel getUserRealmModel(String userId) {
         UserModel user = session.getProvider(UserProvider.class).getUserById(session.getContext().getRealm(), userId);
 
-        if(user instanceof CustomUserAdapter) return ((CustomUserAdapter)user).getRealm();
+        if (user instanceof CustomUserAdapter) return ((CustomUserAdapter) user).getRealm();
 
         return realm;
     }

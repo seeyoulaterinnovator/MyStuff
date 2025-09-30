@@ -65,48 +65,53 @@ public class UserPostRepository {
 
     public List<UserPostEntity> getAllUserPost() {
         return em.createQuery(
-                        "select ac " +
-                                "from UserPostEntity ac", UserPostEntity.class)
-                .getResultList();
+                "select ac from UserPostEntity ac " +
+                        "left join fetch ac.user " +
+                        "left join fetch ac.customer " +
+                        "left join fetch ac.role " +
+                        "left join fetch ac.brand",
+                UserPostEntity.class
+        ).getResultList();
     }
 
     public List<UserPostEntity> getAllUserPostByUserId(String userId) {
         return em.createQuery(
-                        "select upe " +
-                                "from UserPostEntity upe " +
-                                "where upe.user.id = :userId ", UserPostEntity.class)
-                .setParameter("userId", userId)
-                .getResultList();
+                "select upe from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.customer " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.brand " +
+                        "where upe.user.id = :userId",
+                UserPostEntity.class
+        ).setParameter("userId", userId).getResultList();
     }
 
     public List<UserPostEntity> findUserPostsByUserIds(List<String> userIds) {
         return em.createQuery(
-                        "select distinct upe " +
-                                "from UserPostEntity upe " +
-                                "left join fetch upe.user " +
-                                "left join fetch upe.systemRoles sr " +
-                                "left join fetch upe.role " +
-                                "left join fetch upe.customer " +
-                                "left join fetch sr.externalSystem " +
-                                "where upe.user.id in :userIds ", UserPostEntity.class)
-                .setParameter("userIds", userIds)
-                .getResultList();
+                "select distinct upe from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.systemRoles sr " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.customer " +
+                        "left join fetch sr.externalSystem " +
+                        "left join fetch upe.brand " +
+                        "where upe.user.id in :userIds",
+                UserPostEntity.class
+        ).setParameter("userIds", userIds).getResultList();
     }
 
     public List<UserPostEntity> findUserPostsByIds(List<String> userPostIds) {
-        if (userPostIds.isEmpty()) {
-            return Collections.emptyList();
-        }
+        if (userPostIds.isEmpty()) return Collections.emptyList();
         return em.createQuery(
-                        "select upe " +
-                                "from UserPostEntity upe " +
-                                "left join fetch upe.user " +
-                                "left join fetch upe.systemRoles " +
-                                "left join fetch upe.role " +
-                                "left join fetch upe.customer " +
-                                "where upe.id in :userPostIds ", UserPostEntity.class)
-                .setParameter("userPostIds", userPostIds)
-                .getResultList();
+                "select upe from UserPostEntity upe " +
+                        "left join fetch upe.user " +
+                        "left join fetch upe.systemRoles " +
+                        "left join fetch upe.role " +
+                        "left join fetch upe.customer " +
+                        "left join fetch upe.brand " +
+                        "where upe.id in :userPostIds",
+                UserPostEntity.class
+        ).setParameter("userPostIds", userPostIds).getResultList();
     }
 
     public List<UserPostRoleEntity> getAllUserPostRoles() {
@@ -118,7 +123,7 @@ public class UserPostRepository {
         List<ExternalSystemRoleEntity> result = em.createQuery(
                         "select role " +
                                 "from ExternalSystemRoleEntity role \n" +
-                                "join ExternalSystemEntity sys on role.externalSystem = sys.id \n" +
+                                "join ExternalSystemEntity sys on role.externalSystem.id = sys.id \n" +
                                 "where sys.name = :sysName and sys.realmId = :realmId ", ExternalSystemRoleEntity.class)
                 .setParameter("sysName", sysName)
                 .setParameter("realmId", realmId)
@@ -137,12 +142,14 @@ public class UserPostRepository {
     }
 
     public List<UserPostEntity> findUserPostsByUser(final UserEntity user) {
-        final String DEBUG_STR = "findUserPosts";
-        log.debug("{}: user={}", DEBUG_STR, user.getId());
-
-        return em.createQuery("select up from UserPostEntity up where up.user =:user", UserPostEntity.class)
-                .setParameter("user", user)
-                .getResultList();
+        return em.createQuery(
+                "select up from UserPostEntity up " +
+                        "left join fetch up.customer " +
+                        "left join fetch up.role " +
+                        "left join fetch up.brand " +
+                        "where up.user = :user",
+                UserPostEntity.class
+        ).setParameter("user", user).getResultList();
     }
 
     public List<UserPostEntity> findUserPostRoleByUserId(final String userId) throws NotFoundException {

@@ -15,7 +15,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -150,12 +149,8 @@ public abstract class AbstractAuthMailPhoneForm extends AbstractUsernameFormAuth
         }
         context.setUser(user);
         if (user.getRequiredActionsStream().findAny().isEmpty()) {
-            UserEntity userEntity = new UserEntity();
-            userEntity.setId(user.getId());
-            loginHistory.createSuccessAuth(userEntity, context.getRealm().getName());
+            loginHistory.createSuccessAuth(user, context.getRealm().getName());
             log.info("loginHistory.createSuccessAuth(userEntity, context.getRealm().getName())");
-//            String clientId = authSession.getClient().getClientId();
-//            authorisedUsersService.saveSuccessfulAuth(user, authSession.getRealm().getId(), clientId,typeId);
         }
         return true;
     }

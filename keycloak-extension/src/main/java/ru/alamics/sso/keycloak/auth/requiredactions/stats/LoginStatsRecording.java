@@ -5,11 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.sessions.AuthenticationSessionModel;
-import ru.alamics.sso.auth_n_regi.AuthOrRegTypeNotFoundException;
-import ru.alamics.sso.keycloak.registration.mapper.UserModelUserMapper;
-import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.registration.service.AuthorisedUsersService;
 import ru.alamics.sso.stats.LoginHistory;
 
@@ -43,10 +38,9 @@ public class LoginStatsRecording implements RequiredActionProvider {
     public void processAction(RequiredActionContext context) {
     }
 
-    private void recordRecentLogin(UserModel model, RequiredActionContext context) throws AuthOrRegTypeNotFoundException {
-        UserEntity entity = new UserEntity();
-        entity.setId(model.getId());
-        loginHistoryService.create(entity);
+    private void recordRecentLogin(UserModel model, RequiredActionContext context) {
+        String realmName = context.getRealm().getName();
+        loginHistoryService.create(model, realmName);
     }
 
     @Override

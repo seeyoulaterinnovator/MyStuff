@@ -13,6 +13,7 @@ import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.util.AttemptFailsMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class AttemptFailsService {
@@ -47,20 +48,23 @@ public class AttemptFailsService {
     }
 
     private boolean isCountFromLastAuth(String phone, String realm, String cause, UserEntity user) {
-        List<UserLoginHistory> userLoginHistories = userHistoryLoginRepository.findLastAuthSuccess(user, realm);
-        if (userLoginHistories.isEmpty()) {
+        Optional<UserLoginHistory> userLoginHistoryOpt = userHistoryLoginRepository.findLastAuthSuccess(user, realm);
+
+        if (userLoginHistoryOpt.isEmpty()) {
             return false;
         }
+
         if (!blackListRepository.isWasBlockedByPhoneRealmCause(phone, realm, cause)) {
             return false;
         }
 
-        for (UserLoginHistory history : userLoginHistories) {
-            return history.getLoginedAt().isAfter(blackListRepository.findBlockedByPhoneRealmCause(phone, realm, cause)
-                    .stream().findFirst().get().getUnblockedAt());
-        }
-
-        return false;
+        return blackListRepository.findBlockedByPhoneRealmCause(phone, realm, cause)
+                .stream()
+                .findFirst()
+                .map(blocked -> {
+                    return userLoginHistoryOpt.get().getLoginedAt().isAfter(blocked.getUnblockedAt());
+                })
+                .orElse(false);
     }
 
     public void deleteAttempts(List<AttemptFailsDto> dto) {

@@ -11,10 +11,12 @@ import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmR
 import { useFetch } from "../../utils/useFetch";
 import { UserParams, UserRoute } from "../../user/routes/User";
 import { useParams } from "../../utils/useParams";
+import { RealmBrandRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/brandRepresentation";
 
 type RealmContextType = {
   realm: string;
   searchRealm: string;
+  realmBrands: RealmBrandRepresentation[];
   searchRealmUserId?: string;
   realmRepresentation?: RealmRepresentation;
   searchRealmRepresentation?: RealmRepresentation;
@@ -38,6 +40,9 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
   const [searchRealm, setSearchRealm] = useState<string | null>(null);
   const [searchRealmRepresentation, setSearchRealmRepresentation] =
     useState<RealmRepresentation>();
+  const [realmBrands, setRealmBrands] = useState<RealmBrandRepresentation[]>(
+    [],
+  );
   const navigate = useNavigate();
 
   const routeMatch = useMatch({
@@ -107,6 +112,15 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     [realm, searchRealm, userId],
   );
 
+  useFetch(
+    async () => {
+      const response = await adminClient.customBrands.getRealmBrands({ realm });
+      return response.results.brands;
+    },
+    setRealmBrands,
+    [realm, key],
+  );
+
   return (
     <RealmContext.Provider
       value={{
@@ -114,6 +128,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
         searchRealm:
           searchRealm && searchRealmRepresentation ? searchRealm : realm,
         realmRepresentation,
+        realmBrands,
         searchRealmRepresentation:
           searchRealm && searchRealmRepresentation
             ? searchRealmRepresentation

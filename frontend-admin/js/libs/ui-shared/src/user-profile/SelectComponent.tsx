@@ -41,6 +41,8 @@ export const SelectComponent = (props: UserProfileFieldProps) => {
   const optionLabel =
     (attribute.annotations?.["inputOptionLabels"] as OptionLabel) || {};
 
+  const defaultValue = attribute.annotations?.defaultValue ?? "";
+
   const fetchLabel = (option: string) =>
     label(props.t, optionLabel[option], option);
 
@@ -63,7 +65,7 @@ export const SelectComponent = (props: UserProfileFieldProps) => {
     <UserProfileGroup {...props}>
       <Controller
         name={fieldName(attribute.name)}
-        defaultValue=""
+        defaultValue={defaultValue}
         control={form.control}
         render={({ field }) => (
           <KeycloakSelect
