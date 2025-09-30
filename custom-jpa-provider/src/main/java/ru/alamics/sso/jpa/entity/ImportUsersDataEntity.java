@@ -5,7 +5,6 @@ import org.hibernate.annotations.GenericGenerator;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @NoArgsConstructor
 @Entity
@@ -30,6 +29,8 @@ public class ImportUsersDataEntity {
     private String tomsId;
     @Column(name = "dmp_id")
     private String dmpId;
+    @Column(name = "MARK_BRAND_ID")
+    private String markBrandId;
     @Column(name = "personal_account")
     private String personalAccount;
     @Column(name = "personal_account_user")
@@ -76,6 +77,10 @@ public class ImportUsersDataEntity {
 
     public String getDmpId() {
         return this.dmpId;
+    }
+
+    public String getMarkBrandId() {
+        return this.markBrandId;
     }
 
     public String getPersonalAccount() {
@@ -142,6 +147,10 @@ public class ImportUsersDataEntity {
         this.dmpId = dmpId;
     }
 
+    public void setMarkBrandId(String markBrandId) {
+        this.markBrandId = markBrandId;
+    }
+
     public void setPersonalAccount(String personalAccount) {
         this.personalAccount = personalAccount;
     }
@@ -182,7 +191,7 @@ public class ImportUsersDataEntity {
         if (o == this) return true;
         if (!(o instanceof ImportUsersDataEntity)) return false;
         final ImportUsersDataEntity other = (ImportUsersDataEntity) o;
-        if (!other.canEqual((Object) this)) return false;
+        if (!other.canEqual(this)) return false;
         final Object this$id = this.getId();
         final Object other$id = other.getId();
         if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
@@ -205,6 +214,10 @@ public class ImportUsersDataEntity {
         final Object this$dmpId = this.getDmpId();
         final Object other$dmpId = other.getDmpId();
         if (this$dmpId == null ? other$dmpId != null : !this$dmpId.equals(other$dmpId)) return false;
+        final Object this$markBrandId = this.getMarkBrandId();
+        final Object other$markBrandId = other.getMarkBrandId();
+        if (this$markBrandId == null ? other$markBrandId != null : !this$markBrandId.equals(other$markBrandId))
+            return false;
         final Object this$personalAccount = this.getPersonalAccount();
         final Object other$personalAccount = other.getPersonalAccount();
         if (this$personalAccount == null ? other$personalAccount != null : !this$personalAccount.equals(other$personalAccount))
@@ -257,6 +270,8 @@ public class ImportUsersDataEntity {
         result = result * PRIME + ($tomsId == null ? 43 : $tomsId.hashCode());
         final Object $dmpId = this.getDmpId();
         result = result * PRIME + ($dmpId == null ? 43 : $dmpId.hashCode());
+        final Object $markBrandId = this.getMarkBrandId();
+        result = result * PRIME + ($markBrandId == null ? 43 : $markBrandId.hashCode());
         final Object $personalAccount = this.getPersonalAccount();
         result = result * PRIME + ($personalAccount == null ? 43 : $personalAccount.hashCode());
         final Object $personalAccountUser = this.getPersonalAccountUser();
@@ -278,6 +293,6 @@ public class ImportUsersDataEntity {
     }
 
     public String toString() {
-        return "ImportUsersDataEntity(id=" + this.getId() + ", importUsersReport=" + this.getImportUsersReport() + ", firstName=" + this.getFirstName() + ", email=" + this.getEmail() + ", phone=" + this.getPhone() + ", tomsId=" + this.getTomsId() + ", dmpId=" + this.getDmpId() + ", personalAccount=" + this.getPersonalAccount() + ", personalAccountUser=" + this.getPersonalAccountUser() + ", role=" + this.getRole() + ", systems=" + this.getSystems() + ", isCreated=" + this.isCreated() + ", userId=" + this.getUserId() + ", errors=" + this.getErrors() + ", status=" + this.getStatus() + ", cleanPassword=" + this.getCleanPassword() + ")";
+        return "ImportUsersDataEntity(id=" + this.getId() + ", importUsersReport=" + this.getImportUsersReport() + ", firstName=" + this.getFirstName() + ", email=" + this.getEmail() + ", phone=" + this.getPhone() + ", tomsId=" + this.getTomsId() + ", dmpId=" + this.getDmpId() + ", markBrandId=" + this.getMarkBrandId() + ", personalAccount=" + this.getPersonalAccount() + ", personalAccountUser=" + this.getPersonalAccountUser() + ", role=" + this.getRole() + ", systems=" + this.getSystems() + ", isCreated=" + this.isCreated() + ", userId=" + this.getUserId() + ", errors=" + this.getErrors() + ", status=" + this.getStatus() + ", cleanPassword=" + this.getCleanPassword() + ")";
     }
 }

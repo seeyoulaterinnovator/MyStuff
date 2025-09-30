@@ -79,6 +79,8 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
                 return userPost.getTomsId();
             case DMP_ID:
                 return userPost.getDmpId();
+            case MARK_BRAND_ID:
+                return userPost.getMarkBrandId();
             case ROLE:
                 return userPost.getUserRole() == null ? "" : userPost.getUserRole().getName();
             case SYSTEMS:
@@ -128,8 +130,14 @@ public class UserPostMapper extends AbstractOIDCProtocolMapper implements OIDCAc
     }
 
     private UserPostResponse getUserPost(UserModel user) {
-        this.userPostService = Lookup.lookup(UserPostService.class);
-        return userPostService.getUserPost(user.getId()).stream().filter(o -> o.isSelected()).findFirst()
-                .orElse(null);
+        try {
+            this.userPostService = Lookup.lookup(UserPostService.class);
+            var list = userPostService.getUserPost(user.getId());
+            if (list == null || list.isEmpty()) return null;
+            return list.stream().filter(UserPostResponse::isSelected).findFirst().orElse(list.get(0));
+        } catch (Exception e) {
+            log.warn("UserPostMapper.getUserPost: cannot resolve user post for userId={}", user != null ? user.getId() : null, e);
+            return null;
+        }
     }
 }

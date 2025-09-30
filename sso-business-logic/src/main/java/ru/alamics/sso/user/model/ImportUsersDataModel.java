@@ -13,6 +13,7 @@ public class ImportUsersDataModel {
     private String phone;
     private String tomsId;
     private String dmpId;
+    private String markBrandId;
     private String role;
     private String systems;
     private boolean isCreated;

@@ -11,6 +11,8 @@ export default class UserDetailsPage extends PageObject {
   firstNameValue: string;
   lastNameInput: string;
   lastNameValue: string;
+  markBrandIdInput: string;
+  markBrandIdValue: string;
   requiredUserActions: RequiredActionAlias[];
   identityProviderLinksTab: string;
   detailsTab: string;
@@ -27,6 +29,8 @@ export default class UserDetailsPage extends PageObject {
     this.firstNameValue = "firstname";
     this.lastNameInput = "lastName";
     this.lastNameValue = "lastname";
+    this.markBrandIdInput = "markBrandId";
+    this.markBrandIdValue = "markBrandId";
     this.requiredUserActions = [RequiredActionAlias.UPDATE_PASSWORD];
     this.identityProviderLinksTab = "identity-provider-links-tab";
     this.detailsTab = "user-details-tab";

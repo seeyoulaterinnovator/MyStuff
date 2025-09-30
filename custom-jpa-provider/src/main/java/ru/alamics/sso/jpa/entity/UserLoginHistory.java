@@ -33,4 +33,10 @@ public class UserLoginHistory implements Serializable {
 
     @Column(name = "realm")
     private String realm;
+
+    @Column(name = "BRAND_ID")
+    private String brandId;
+
+    @Column(name = "BRAND_NAME")
+    private String brandName;
 }

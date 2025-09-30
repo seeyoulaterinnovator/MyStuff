@@ -32,4 +32,5 @@ export default interface UserRepresentation {
   self?: string;
   serviceAccountClientId?: string;
   userProfileMetadata?: UserProfileMetadata;
+  markBrandId?: string;
 }
