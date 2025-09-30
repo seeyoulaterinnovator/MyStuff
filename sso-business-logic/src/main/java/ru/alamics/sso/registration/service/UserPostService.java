@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.keycloak.models.jpa.entities.UserEntity;
 import ru.alamics.sso.jpa.entity.*;
+import ru.alamics.sso.jpa.repository.BrandRepository;
 import ru.alamics.sso.jpa.repository.CustomerRepository;
 import ru.alamics.sso.jpa.repository.UserPostRepository;
 import ru.alamics.sso.jpa.repository.UserRepository;
@@ -28,17 +29,18 @@ import java.util.stream.Collectors;
 public class UserPostService {
     @Inject
     UserPostRepository userPostRepository;
-
     @Inject
     UserRepository userRepository;
-
     @Inject
     CustomerRepository customerRepository;
-
+    @Inject
+    BrandRepository brandRepository;
     @Inject
     CustomerRequestService customerRequestService;
 
-    public UserPostResponse save(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
+    public UserPostResponse save(UserPostRequest userPostRequest)
+            throws NotFoundException, FoundUserPostException, NotValidException {
+
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
         if (user == null) {
             throw new NotFoundException("УЗ с таким ID не найдена");
@@ -51,27 +53,43 @@ public class UserPostService {
 
         checkUserPost(userPostRequest);
 
-        List<UserPostEntity> userPosts = userPostRepository.findUserPostsByUser(user);
-        if (userPosts != null) {
-            userPosts = userPosts.stream().filter(UserPostEntity::isSelected).collect(Collectors.toList());
-        }
+        List<UserPostEntity> selected = userPostRepository.findUserPostsByUser(user)
+                .stream().filter(UserPostEntity::isSelected).collect(Collectors.toList());
 
         UserPostEntity userPost = DataMapper.toUserPost(userPostRequest);
         userPost.setUser(user);
         userPost.setRole(role);
         userPost.setCustomer(customerRepository.save(userPost.getCustomer()));
-        userPost.setSelected(CollectionUtils.isEmpty(userPosts));
+        userPost.setSelected(CollectionUtils.isEmpty(selected));
+        final String realmId = user.getRealmId();
+        final String requestedBrandId = userPostRequest.getMarkBrandId();
+
+        if (requestedBrandId != null && !requestedBrandId.isBlank()) {
+            BrandEntity brand = brandRepository.findById(requestedBrandId)
+                    .orElseThrow(() -> new NotFoundException("Бренд не найден: " + requestedBrandId));
+            if (!brandRepository.isBrandInRealm(realmId, requestedBrandId)) {
+                throw new NotFoundException("Бренд " + requestedBrandId + " не привязан к реалму " + realmId);
+            }
+            userPost.setBrand(brand);
+        } else {
+            BrandEntity def = brandRepository.findDefaultByRealm(realmId)
+                    .orElseThrow(() -> new NotFoundException("Дефолтный бренд для реалма " + realmId + " не настроен"));
+            userPost.setBrand(def);
+        }
 
         customerRequestService.updateCustomerName(userPostRequest.getTomsId(), userPostRequest.getOrgName());
 
         return DataMapper.toUserPostResponse(userPostRepository.save(userPost));
     }
 
-    private void checkUserPost(UserPostRequest postRequest) throws FoundUserPostException, NotValidException {
-        UserPostEntity post = userPostRepository.findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
+    private void checkUserPost(UserPostRequest postRequest)
+            throws FoundUserPostException, NotValidException {
+        UserPostEntity post = userPostRepository
+                .findUserPostByUserIdAndTomsId(postRequest.getUserId(), postRequest.getTomsId());
         if (post != null) {
-            throw new FoundUserPostException(post.getId(), String.format("УЗ уже имеет должность с таким tomsId: userId=%s, postId=%s, tomsId=%s",
-                    postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
+            throw new FoundUserPostException(post.getId(),
+                    String.format("УЗ уже имеет должность с таким tomsId: userId=%s, postId=%s, tomsId=%s",
+                            postRequest.getUserId(), post.getId(), postRequest.getTomsId()));
         }
 
         TomsIdValidator.validate(postRequest.getTomsId());
@@ -93,7 +111,6 @@ public class UserPostService {
         }
 
         userPost.setRole(role);
-
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 
@@ -105,7 +122,7 @@ public class UserPostService {
         String userId = post.getUser().getId();
         userPostRepository.remove(post);
         List<UserPostEntity> userPosts = userPostRepository.getAllUserPostByUserId(userId);
-        if (!CollectionUtils.isEmpty(userPosts)) {
+        if (!org.apache.commons.collections4.CollectionUtils.isEmpty(userPosts)) {
             if (userPosts.stream().noneMatch(UserPostEntity::isSelected)) {
                 UserPostEntity userPostEntity = userPosts.get(0);
                 userPostEntity.setSelected(true);
@@ -142,24 +159,19 @@ public class UserPostService {
     }
 
     public List<String> getAllExternalSystemLabelsForRealm(String realmId) {
-        return userPostRepository.getAllExternalSystemForRealm(realmId).stream().map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
+        return userPostRepository.getAllExternalSystemForRealm(realmId)
+                .stream().map(ExternalSystemEntity::getLabel).collect(Collectors.toList());
     }
 
     public UserPostResponse addSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
-
         UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
-        if (userPost == null) {
-            throw new NotFoundException("Должность не найдена");
-        }
+        if (userPost == null) throw new NotFoundException("Должность не найдена");
+
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.findExternalSystemRole(externalSystemRoleRequest.getSystemRoleId());
-        if (externalSystemRole == null) {
-            throw new NotFoundException("Доступ в систему не найден");
-        }
+        if (externalSystemRole == null) throw new NotFoundException("Доступ в систему не найден");
 
         Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
-        if (systemRoles == null) {
-            systemRoles = new HashSet<>();
-        }
+        if (systemRoles == null) systemRoles = new HashSet<>();
 
         systemRoles.add(externalSystemRole);
         userPost.setSystemRoles(systemRoles);
@@ -167,31 +179,22 @@ public class UserPostService {
     }
 
     public UserPostResponse addAllSystemRole(String postId, String realmId) throws NotFoundException {
-
         UserPostEntity userPost = userPostRepository.getUserPost(postId);
-        if (userPost == null) {
-            throw new NotFoundException("Должность не найдена");
-        }
+        if (userPost == null) throw new NotFoundException("Должность не найдена");
 
         Set<ExternalSystemRoleEntity> systemRoles = userPost.getSystemRoles();
-        if (systemRoles == null) {
-            systemRoles = new HashSet<>();
-        }
+        if (systemRoles == null) systemRoles = new HashSet<>();
 
         systemRoles.addAll(userPostRepository.getAllExternalSystemRoleForRealm(realmId));
         userPost.setSystemRoles(systemRoles);
-
         return DataMapper.toUserPostResponse(userPostRepository.update(userPost));
     }
 
     public UserPostResponse removeSystemRole(ExternalSystemRoleRequest externalSystemRoleRequest) throws NotFoundException {
         UserPostEntity userPost = userPostRepository.getUserPost(externalSystemRoleRequest.getUserPostId());
-        if (userPost == null) {
-            throw new NotFoundException("Должность не найдена");
-        }
+        if (userPost == null) throw new NotFoundException("Должность не найдена");
         if (userPost.getSystemRoles() == null || userPost.getSystemRoles().isEmpty() ||
-                !userPost.getSystemRoles().stream().anyMatch(o ->
-                        o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))) {
+                userPost.getSystemRoles().stream().noneMatch(o -> o.getId().equals(externalSystemRoleRequest.getSystemRoleId()))) {
             throw new NotFoundException("Роль не найдена в этой должности");
         }
         userPost.getSystemRoles().remove(userPost.getSystemRoles().stream()
@@ -202,28 +205,22 @@ public class UserPostService {
 
     public Long getUserPostRole(String name) throws NotFoundException {
         UserPostRoleEntity userPostRole = userPostRepository.getUserPostRole(name);
-        if (userPostRole == null) {
-            throw new NotFoundException("Роль не найдена");
-        }
+        if (userPostRole == null) throw new NotFoundException("Роль не найдена");
         return userPostRole.getId();
     }
 
     public Long getExternalSystemRoleId(String sysName, String realmId) throws NotFoundException {
         ExternalSystemRoleEntity externalSystemRole = userPostRepository.getExternalSystemRole(sysName, realmId);
-        if (externalSystemRole == null) {
-            throw new NotFoundException("Роль клиента не найдена");
-        }
+        if (externalSystemRole == null) throw new NotFoundException("Роль клиента не найдена");
         return externalSystemRole.getId();
     }
 
-    public UserPostResponse addUserPostAndAllSystemRole(UserPostRequest userPostRequest) throws NotFoundException, FoundUserPostException, NotValidException {
+    public UserPostResponse addUserPostAndAllSystemRole(UserPostRequest userPostRequest)
+            throws NotFoundException, FoundUserPostException, NotValidException {
 
         UserPostResponse userPost = save(userPostRequest);
-
         UserEntity user = userRepository.findUser(userPostRequest.getUserId());
-
         addAllSystemRole(userPost.getId(), user.getRealmId());
-
         return userPost;
     }
 

@@ -14,7 +14,7 @@ public class StandartImportFormat implements ImportFormat {
 
     public void checkStructure(FileModel file) throws FileServiceException {
         String[] headers = file.getHeaders();
-        if (headers == null || headers.length != 7 || file.getCountRows() < 2) {
+        if (headers == null || headers.length != 8 || file.getCountRows() < 2) {
             throw new FileServiceException("File Structure is not valid! Count columns not valid or data is empty!");
         }
         checkHeaders(headers);
@@ -24,24 +24,27 @@ public class StandartImportFormat implements ImportFormat {
         for (int i = 0; i < headers.length; i++) {
             switch (i) {
                 case 0:
-                    checkHeader(headers[i], FIRST_NAME);
+                    checkHeader(headers[i], MARK_BRAND_ID);
                     break;
                 case 1:
-                    checkHeader(headers[i], EMAIL);
+                    checkHeader(headers[i], FIRST_NAME);
                     break;
                 case 2:
-                    checkHeader(headers[i], PHONE);
+                    checkHeader(headers[i], EMAIL);
                     break;
                 case 3:
-                    checkHeader(headers[i], TOMS_ID);
+                    checkHeader(headers[i], PHONE);
                     break;
                 case 4:
-                    checkHeader(headers[i], DMP_ID);
+                    checkHeader(headers[i], TOMS_ID);
                     break;
                 case 5:
-                    checkHeader(headers[i], ROLE);
+                    checkHeader(headers[i], DMP_ID);
                     break;
                 case 6:
+                    checkHeader(headers[i], ROLE);
+                    break;
+                case 7:
                     checkHeader(headers[i], SYSTEM);
                     break;
             }
@@ -67,25 +70,27 @@ public class StandartImportFormat implements ImportFormat {
         for (int i = 0; i < row.length; i++) {
             switch (i) {
                 case 0:
-                    userImport.setFirstName(row[i]);
+                    userImport.setMarkBrandId(row[i]);
                     break;
                 case 1:
-                    userImport.setEmail(row[i]);
+                    userImport.setFirstName(row[i]);
                     break;
                 case 2:
-                    userImport.setPhone(row[i]);
+                    userImport.setEmail(row[i]);
                     break;
                 case 3:
-                    userImport.setTomsId(row[i]);
+                    userImport.setPhone(row[i]);
                     break;
                 case 4:
-                    userImport.setDmpId(row[i]);
+                    userImport.setTomsId(row[i]);
                     break;
                 case 5:
-                    userImport.setRole(row[i]);
+                    userImport.setDmpId(row[i]);
                     break;
                 case 6:
-                    //userImport.setSystemNames(Arrays.asList(row[i].replaceAll("\\s", "").split(",")));
+                    userImport.setRole(row[i]);
+                    break;
+                case 7:
                     userImport.setSystems(row[i]);
                     break;
             }

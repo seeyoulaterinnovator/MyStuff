@@ -7,7 +7,6 @@ import ru.alamics.sso.registration.model.User;
 import ru.alamics.sso.util.Util;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,13 +44,12 @@ public class UserModelUserMapper {
         if (user.getPhone() != null) {
 
             String phone = user.getPhone();
-            if (phone != null)
-                phone = Util.getCleanUserPhone(phone);
+            phone = Util.getCleanUserPhone(phone);
 
-            model.setAttribute(ATTR_PHONE_NAME, Arrays.asList(phone));
+            model.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
         }
         if (user.getPhoneVerifiedOn() != null)
-            model.setAttribute(ATTR_PHONE_VALIDATED_ON, Arrays.asList(user.getPhoneVerifiedOn().toString()));
+            model.setAttribute(ATTR_PHONE_VALIDATED_ON, List.of(user.getPhoneVerifiedOn().toString()));
 
     }
 

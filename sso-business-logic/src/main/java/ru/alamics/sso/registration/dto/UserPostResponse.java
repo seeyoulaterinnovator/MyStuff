@@ -18,6 +18,7 @@ public class UserPostResponse implements Serializable {
     private String userId;
     private String tomsId;
     private String dmpId;
+    private String markBrandId;
     private UserPostRoleDto userRole;
     private List<ExternalSystemRoleDto> systemRoles;
     private boolean selected;
@@ -32,12 +33,13 @@ public class UserPostResponse implements Serializable {
     public UserPostResponse() {
     }
 
-    @java.beans.ConstructorProperties({"id", "userId", "tomsId", "dmpId", "userRole", "systemRoles", "selected", "organization", "updateTime"})
-    UserPostResponse(String id, String userId, String tomsId, String dmpId, UserPostRoleDto userRole, List<ExternalSystemRoleDto> systemRoles, boolean selected, String organization, LocalDateTime updateTime) {
+    @java.beans.ConstructorProperties({"id", "userId", "tomsId", "dmpId", "markBrandId", "userRole", "systemRoles", "selected", "organization", "updateTime"})
+    UserPostResponse(String id, String userId, String tomsId, String dmpId, String markBrandId, UserPostRoleDto userRole, List<ExternalSystemRoleDto> systemRoles, boolean selected, String organization, LocalDateTime updateTime) {
         this.id = id;
         this.userId = userId;
         this.tomsId = tomsId;
         this.dmpId = dmpId;
+        this.markBrandId = markBrandId;
         this.userRole = userRole;
         this.systemRoles = systemRoles;
         this.selected = selected;
@@ -50,7 +52,7 @@ public class UserPostResponse implements Serializable {
     }
 
     public UserPostResponseBuilder toBuilder() {
-        return new UserPostResponseBuilder().id(this.id).userId(this.userId).tomsId(this.tomsId).dmpId(this.dmpId).userRole(this.userRole).systemRoles(this.systemRoles).selected(this.selected).organization(this.organization).updateTime(this.updateTime);
+        return new UserPostResponseBuilder().id(this.id).userId(this.userId).tomsId(this.tomsId).dmpId(this.dmpId).markBrandId(this.markBrandId).userRole(this.userRole).systemRoles(this.systemRoles).selected(this.selected).organization(this.organization).updateTime(this.updateTime);
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -59,6 +61,7 @@ public class UserPostResponse implements Serializable {
         private String userId;
         private String tomsId;
         private String dmpId;
+        private String markBrandId;
         private UserPostRoleDto userRole;
         private List<ExternalSystemRoleDto> systemRoles;
         private boolean selected;
@@ -88,6 +91,11 @@ public class UserPostResponse implements Serializable {
             return this;
         }
 
+        public UserPostResponseBuilder markBrandId(String markBrandId) {
+            this.markBrandId = markBrandId;
+            return this;
+        }
+
         public UserPostResponseBuilder userRole(UserPostRoleDto userRole) {
             this.userRole = userRole;
             return this;
@@ -114,11 +122,23 @@ public class UserPostResponse implements Serializable {
         }
 
         public UserPostResponse build() {
-            return new UserPostResponse(id, userId, tomsId, dmpId, userRole, systemRoles, selected, organization, updateTime);
+            return new UserPostResponse(id, userId, tomsId, dmpId, markBrandId, userRole, systemRoles, selected, organization, updateTime);
         }
 
+        @Override
         public String toString() {
-            return "UserPostResponse.UserPostResponseBuilder(id=" + this.id + ", userId=" + this.userId + ", tomsId=" + this.tomsId + ", dmpId=" + this.dmpId + ", userRole=" + this.userRole + ", systemRoles=" + this.systemRoles + ", selected=" + this.selected + ", organization=" + this.organization + ", updateTime=" + this.updateTime + ")";
+            return "UserPostResponseBuilder{" +
+                    "id='" + id + '\'' +
+                    ", userId='" + userId + '\'' +
+                    ", tomsId='" + tomsId + '\'' +
+                    ", dmpId='" + dmpId + '\'' +
+                    ", markBrandId='" + markBrandId + '\'' +
+                    ", userRole=" + userRole +
+                    ", systemRoles=" + systemRoles +
+                    ", selected=" + selected +
+                    ", organization='" + organization + '\'' +
+                    ", updateTime=" + updateTime +
+                    '}';
         }
     }
 }

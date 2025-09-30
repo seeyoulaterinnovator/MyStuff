@@ -56,6 +56,7 @@ import { RealmSettingsTab, toRealmSettings } from "./routes/RealmSettings";
 import { SecurityDefenses } from "./security-defences/SecurityDefenses";
 import { UserProfileTab } from "./user-profile/UserProfileTab";
 import { RealmSettingsCacheTab } from "./CacheTab";
+import { BrandsTab } from "./BrandsTab";
 
 export interface UIRealmRepresentation extends RealmRepresentation {
   upConfig?: UserProfileConfig;
@@ -295,6 +296,7 @@ export const RealmSettingsTabs = () => {
   const clientPoliciesTab = useTab("client-policies");
   const userProfileTab = useTab("user-profile");
   const userRegistrationTab = useTab("user-registration");
+  const brandsTab = useTab("brands");
 
   const useClientPoliciesTab = (tab: ClientPoliciesTab) =>
     useRoutableTab(
@@ -468,6 +470,13 @@ export const RealmSettingsTabs = () => {
             {...userRegistrationTab}
           >
             <UserRegistration />
+          </Tab>
+          <Tab
+            title={<TabTitleText>{t("brands")}</TabTitleText>}
+            data-testid="rs-brands-tab"
+            {...brandsTab}
+          >
+            <BrandsTab />
           </Tab>
         </RoutableTabs>
       </PageSection>

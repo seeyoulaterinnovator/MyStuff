@@ -21,7 +21,9 @@ public class CustomJpaEntityProvider implements JpaEntityProvider {
                 Customer.class,
                 Settings.class,
                 AppProperty.class,
-                MainRedirectUri.class
+                MainRedirectUri.class,
+                BrandEntity.class,
+                RealmBrandEntity.class
         );
     }
 

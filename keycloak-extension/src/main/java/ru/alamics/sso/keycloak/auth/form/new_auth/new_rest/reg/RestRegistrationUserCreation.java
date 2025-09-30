@@ -19,6 +19,9 @@ import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.services.resources.AttributeFormDataProcessor;
+import ru.alamics.sso.jpa.entity.BrandEntity;
+import ru.alamics.sso.jpa.repository.BrandRepository;
+import ru.alamics.sso.keycloak.lookup.Lookup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +56,7 @@ public class RestRegistrationUserCreation implements FormAction, FormActionFacto
                 context.getAuthenticationSession().setAuthNote("email_error", "email is not valid");
                 formData.remove(Validation.FIELD_EMAIL);
             }
-            if (errors.size() > 0) {
+            if (!errors.isEmpty()) {
                 context.error(Errors.INVALID_REGISTRATION);
                 context.validationError(formData, errors);
                 return;
@@ -191,6 +194,17 @@ public class RestRegistrationUserCreation implements FormAction, FormActionFacto
         user.setEnabled(true);
 
         user.setEmail(email);
+
+        String brandId = formData.getFirst("markBrandId");
+        if (brandId == null || brandId.isBlank()) {
+            brandId = Lookup.lookup(BrandRepository.class)
+                    .findDefaultByRealm(context.getRealm().getId())
+                    .map(BrandEntity::getId)
+                    .orElse(null);
+        }
+        if (brandId != null) {
+            user.setSingleAttribute("markBrandId", brandId);
+        }
         context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, username);
         AttributeFormDataProcessor.process(formData, context.getRealm(), user);
         context.setUser(user);

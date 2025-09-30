@@ -1,7 +1,9 @@
 package ru.alamics.sso.user.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.Getter;
 
+@Getter
 public enum UserParameter {
     USER_ID("USER ID"),
     FIRST_NAME("Имя пользователя"),
@@ -9,6 +11,7 @@ public enum UserParameter {
     PHONE("Телефон"),
     TOMS_ID("TOMS ID"),
     DMP_ID("DMP ID"),
+    MARK_BRAND_ID("ID Бренда"),
     ROLE("Роль пользователя"),
     SYSTEM("Целевая система"),
     ENABLED("Активность");
@@ -17,10 +20,6 @@ public enum UserParameter {
 
     UserParameter(String desc){
         this.desc = desc;
-    }
-
-    public String getDesc(){
-        return desc;
     }
 
     @JsonCreator // This is the factory method and must be static
