@@ -16,7 +16,7 @@ preStopDelay:
   delaySeconds: 15
 
 monitoring:
- authMetrics: true
+ authMetrics: false
 
 extraEnvs:
   KC_FEATURES: "{{ envOrDefault  "KC_FEATURES" "" }}"
@@ -77,6 +77,20 @@ service:
   httpPort: 80
   extraPorts: []
 
+ingress:
+- annotations:
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30m"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "10m"
+  hosts:
+    - host: "{{ env "FQDN" }}"
+  tls:
+    - secretName: "sso-balancer-ssl"
+      hosts:
+        - "{{ env "FQDN" }}"
+
 resources:
   limits:
     cpu: '4'
@@ -84,4 +98,3 @@ resources:
   requests:
     cpu: 500m
     memory: 500Mi
-
