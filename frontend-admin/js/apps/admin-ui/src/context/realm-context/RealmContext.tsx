@@ -83,6 +83,7 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
     },
     [isOnUserPage, userId, realm],
   );
+
   useEffect(() => {
     if (!isOnUserPage) {
       setSearchRealm(null);
@@ -114,11 +115,14 @@ export const RealmContextProvider = ({ children }: PropsWithChildren) => {
 
   useFetch(
     async () => {
-      const response = await adminClient.customBrands.getRealmBrands({ realm });
+      const response = await adminClient.customBrands.getRealmBrands({
+        realm,
+        searchRealm: searchRealm ?? undefined,
+      });
       return response.results.brands;
     },
     setRealmBrands,
-    [realm, key],
+    [realm, searchRealm, key],
   );
 
   return (
