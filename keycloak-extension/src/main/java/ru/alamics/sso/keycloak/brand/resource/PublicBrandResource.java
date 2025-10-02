@@ -21,7 +21,6 @@ import java.util.Optional;
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Path("")
 public class PublicBrandResource {
 
     private final KeycloakSession session;
@@ -61,11 +60,11 @@ public class PublicBrandResource {
                         brandEntity.getCode(),
                         brandEntity.getName()
                 ))
-                .build()).orElse(null);
+                .build()).orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @GET
-    @Path("{/brandId}")
+    @Path("/{brandId}")
     @NoCache
     public Response getBrandById(@PathParam("brandId") String brandId) {
         Optional<BrandEntity> brand = brandService.getBrandById(brandId);
@@ -75,7 +74,7 @@ public class PublicBrandResource {
                         brandEntity.getCode(),
                         brandEntity.getName()
                 ))
-                .build()).orElse(null);
+                .build()).orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @GET
@@ -117,6 +116,9 @@ public class PublicBrandResource {
     }
 
     private String getRealm() {
+        if (session.getContext() == null || session.getContext().getRealm() == null) {
+            throw new WebApplicationException("Realm is not available in context", Response.Status.BAD_REQUEST);
+        }
         return session.getContext().getRealm().getName();
     }
 
