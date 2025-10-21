@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_TOMS_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @ApplicationScoped
 @Named("UserRole")
@@ -63,8 +63,16 @@ public class UserRole {
 
         UserModel user = context.getUser();
 
-        selectPostByUser(user, selectedPostId);
+        UserPostEntity userPostEntity = selectPostByUser(user, selectedPostId);
         user.setAttribute(ATTR_TOMS_NAME, Collections.singletonList(tomsId));
+
+        if (userPostEntity.getBrand() != null) {
+            user.setSingleAttribute(ATTR_MARK_BRAND_ID, userPostEntity.getBrand().getId());
+            user.setSingleAttribute(ATTR_MARK_BRAND_CODE, userPostEntity.getBrand().getCode());
+        }
+        if (userPostEntity.getDmpId() != null) {
+            user.setSingleAttribute(ATTR_DMP_NAME, userPostEntity.getDmpId());
+        }
     }
 
     public boolean setUserPost(AuthenticationFlowContext context, List<UserPostResponse> attributes) {
@@ -95,14 +103,15 @@ public class UserRole {
         return userPosts;
     }
 
-    public void selectPostByUser(UserModel user, String selectedPostId) {
+    public UserPostEntity selectPostByUser(UserModel user, String selectedPostId) {
         UserEntity userEntity = userRepository.findUser(user.getId());
-        UserPostEntity userPostEntities = deselectAllPostsByUser(userEntity).stream()
+        UserPostEntity userPostEntity = deselectAllPostsByUser(userEntity).stream()
                 .filter(p -> p.getId().equals(selectedPostId))
                 .findFirst()
                 .orElseThrow(ForbiddenException::new);
-        userPostEntities.setSelected(true);
-        bindRolesToUser(userEntity, userPostEntities);
+        userPostEntity.setSelected(true);
+        bindRolesToUser(userEntity, userPostEntity);
+        return userPostEntity;
     }
 
     private void unbindAllRolesToUser(UserEntity user) {

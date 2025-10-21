@@ -8,10 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.NoCache;
+import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.entity.RealmBrandEntity;
+import ru.alamics.sso.keycloak.GeneralRealm;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.keycloak.manager.ManagerRequestProperties;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.registration.service.BrandService;
 
@@ -21,7 +24,6 @@ import java.util.Optional;
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Path("")
 public class PublicBrandResource {
 
     private final KeycloakSession session;
@@ -61,11 +63,11 @@ public class PublicBrandResource {
                         brandEntity.getCode(),
                         brandEntity.getName()
                 ))
-                .build()).orElse(null);
+                .build()).orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @GET
-    @Path("{/brandId}")
+    @Path("/{brandId}")
     @NoCache
     public Response getBrandById(@PathParam("brandId") String brandId) {
         Optional<BrandEntity> brand = brandService.getBrandById(brandId);
@@ -75,16 +77,20 @@ public class PublicBrandResource {
                         brandEntity.getCode(),
                         brandEntity.getName()
                 ))
-                .build()).orElse(null);
+                .build()).orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @GET
     @Path("")
     @NoCache
-    public Response list() {
-        String realm = getRealm();
+    public Response list(@QueryParam("searchRealm") String searchRealm) {
+        String realm;
+        if (searchRealm != null && !searchRealm.isBlank()) {
+            realm = searchRealm;
+        } else {
+            realm = getRealm();
+        }
         List<RealmBrandEntity> links = brandService.getBrandsForRealm(realm);
-
         List<BrandItemDto> items = links.stream()
                 .map(rb -> new BrandItemDto(
                         rb.getBrand().getId(),
@@ -93,7 +99,6 @@ public class PublicBrandResource {
                         Boolean.TRUE.equals(rb.getIsDefault())
                 ))
                 .toList();
-
         return JsonResponse.success()
                 .addResult("id", realm)
                 .addResult("brands", items)
@@ -117,6 +122,9 @@ public class PublicBrandResource {
     }
 
     private String getRealm() {
+        if (session.getContext() == null || session.getContext().getRealm() == null) {
+            throw new WebApplicationException("Realm is not available in context", Response.Status.BAD_REQUEST);
+        }
         return session.getContext().getRealm().getName();
     }
 

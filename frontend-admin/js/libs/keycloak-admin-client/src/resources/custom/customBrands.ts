@@ -21,9 +21,14 @@ export class CustomBrands extends Resource<{ realm?: string }> {
     path: "/brands/all",
   });
 
-  public getRealmBrands = this.makeRequest<{}, RealmBrandsResponse>({
+  public getRealmBrands = this.makeRequest<
+    { realm: string; searchRealm?: string },
+    RealmBrandsResponse
+  >({
     method: "GET",
     path: "/brands",
+    urlParamKeys: ["realm"],
+    queryParamKeys: ["searchRealm"],
   });
 
   public setDefaultBrand = this.makeRequest<
