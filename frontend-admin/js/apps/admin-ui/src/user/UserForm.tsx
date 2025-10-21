@@ -288,7 +288,7 @@ export const UserForm = ({
               label={t("brand")}
               controller={{
                 defaultValue:
-                  realmBrands.find((brand) => brand.default)?.brandId ?? "none",
+                  realmBrands.find((brand) => brand.default)?.brandId ?? "",
               }}
               options={realmBrands.map((brand) => ({
                 key: brand.brandId,

@@ -24,6 +24,8 @@ import "./user-section.css";
 import RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/realmRepresentation";
 import { QueryParam } from "../customLogic/constants/queryParams";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
+import { updateMarkBrandIdField } from "./utils/user-profile";
+import { RealmBrandRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/brandRepresentation";
 
 export default function CreateUser() {
   const { adminClient } = useAdminClient();
@@ -34,19 +36,32 @@ export default function CreateUser() {
   const {
     realm: realmName,
     realmRepresentation: realm,
-    realmBrands,
+    realmBrands: brands,
   } = useRealm();
   const form = useForm<UserFormFields>({ mode: "onChange" });
   const [addedGroups, setAddedGroups] = useState<GroupRepresentation[]>([]);
-  const [userProfileMetadata, setUserProfileMetadata] =
-    useState<UserProfileMetadata>();
-  const [searchRealm, setSearchRealm] = useState<RealmRepresentation>();
 
+  const [searchRealm, setSearchRealm] = useState<RealmRepresentation>();
   const [searchParams] = useSearchParams();
   const searchRealmName = useMemo(() => {
     return searchParams.get(QueryParam.SEARCH_REALM) || realmName;
   }, [searchParams, realmName]);
   const { isCustomTheme } = useCustomConfig();
+
+  const [searchRealmBrands, setSearchRealmBrands] = useState<
+    RealmBrandRepresentation[]
+  >([]);
+  const realmBrands = useMemo(
+    () => (searchRealmBrands.length ? searchRealmBrands : brands),
+    [brands, searchRealmBrands],
+  );
+
+  const [rawUserProfileMetadata, setRawUserProfileMetadata] =
+    useState<UserProfileMetadata>();
+  const userProfileMetadata = useMemo(
+    () => updateMarkBrandIdField(rawUserProfileMetadata, realmBrands),
+    [rawUserProfileMetadata, realmBrands],
+  );
 
   useFetch(
     () => {
@@ -64,6 +79,22 @@ export default function CreateUser() {
   );
 
   useFetch(
+    async () => {
+      if (isCustomTheme) {
+        const response = await adminClient.customBrands.getRealmBrands({
+          realm: realmName,
+          searchRealm: searchRealmName,
+        });
+        return response.results.brands;
+      } else {
+        return Promise.resolve(brands);
+      }
+    },
+    setSearchRealmBrands,
+    [searchRealmName, brands],
+  );
+
+  useFetch(
     () =>
       adminClient.users.getProfileMetadata({
         realm: realmName,
@@ -76,34 +107,7 @@ export default function CreateUser() {
 
       form.setValue("attributes.locale", realm?.defaultLocale || "");
 
-      // Кастомизируем поле бренд
-      const markBrandId = (userProfileMetadata?.attributes ?? []).find(
-        (attribute) => attribute.name === "markBrandId",
-      );
-
-      if (markBrandId) {
-        markBrandId.annotations = markBrandId.annotations ?? {};
-        markBrandId.annotations.inputType = "select";
-
-        markBrandId.validators = markBrandId.validators ?? {};
-        markBrandId.validators.options = {
-          options: realmBrands.map((realmBrand) => realmBrand.brandId),
-        };
-
-        markBrandId.annotations.inputOptionLabels = realmBrands.reduce(
-          (acc, realmBrand) => {
-            acc[realmBrand.brandId] = realmBrand.brandName;
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        markBrandId.annotations.defaultValue = realmBrands.find(
-          (realmBrand) => realmBrand.default,
-        )?.brandId;
-      }
-
-      setUserProfileMetadata(userProfileMetadata);
+      setRawUserProfileMetadata(userProfileMetadata);
     },
     [searchRealmName],
   );

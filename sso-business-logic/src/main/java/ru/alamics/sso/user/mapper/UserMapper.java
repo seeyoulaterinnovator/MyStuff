@@ -150,6 +150,7 @@ public class UserMapper {
         userPostDto.setUserId(userModel.getId());
         userPostDto.setTomsId(request.getTomsId());
         userPostDto.setDmpId(request.getDmpId());
+        userPostDto.setMarkBrandId(request.getMarkBrandId());
         return userPostDto;
     }
 
@@ -172,6 +173,9 @@ public class UserMapper {
         }
         if (userModel.getFirstAttribute(ATTR_ORG_NAME) != null) {
             userPostRequest.setOrgName(userModel.getFirstAttribute(ATTR_ORG_NAME));
+        }
+        if (userModel.getFirstAttribute(ATTR_MARK_BRAND_ID) != null) {
+            userPostRequest.setMarkBrandId(userModel.getFirstAttribute(ATTR_MARK_BRAND_ID));
         }
         return userPostRequest;
     }

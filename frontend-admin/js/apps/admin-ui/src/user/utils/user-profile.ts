@@ -1,4 +1,8 @@
-import { UserProfileAttributeMetadata } from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
+import {
+  UserProfileAttributeMetadata,
+  UserProfileMetadata,
+} from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
+import { RealmBrandRepresentation } from "@keycloak/keycloak-admin-client/lib/defs/brandRepresentation";
 
 export function isRequiredAttribute({
   required,
@@ -30,4 +34,46 @@ function hasRequiredValidators(
   }
 
   return false;
+}
+
+/**
+ * Обновляет поле markBrandId в userProfileMetadata
+ */
+export function updateMarkBrandIdField(
+  metadata: UserProfileMetadata | undefined,
+  realmBrands: RealmBrandRepresentation[],
+): UserProfileMetadata | undefined {
+  if (!metadata) return metadata;
+
+  const attributes = [...(metadata.attributes ?? [])];
+  const markBrandIndex = attributes.findIndex(
+    (attribute) => attribute.name === "markBrandId",
+  );
+  if (markBrandIndex === -1) return metadata;
+
+  const markBrand = { ...attributes[markBrandIndex] };
+
+  markBrand.annotations = {
+    ...(markBrand.annotations ?? {}),
+    inputType: "select",
+    inputOptionLabels: realmBrands.reduce(
+      (acc, brand) => {
+        acc[brand.brandId] = brand.brandName;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    defaultValue: realmBrands.find((brand) => brand.default)?.brandId,
+  };
+
+  markBrand.validators = {
+    ...(markBrand.validators ?? {}),
+    options: {
+      options: realmBrands.map((brand) => brand.brandId),
+    },
+  };
+
+  attributes[markBrandIndex] = markBrand;
+
+  return { ...metadata, attributes };
 }
