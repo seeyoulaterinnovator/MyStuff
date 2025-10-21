@@ -20,7 +20,7 @@ import {
 } from "@patternfly/react-core";
 import { InfoCircleIcon } from "@patternfly/react-icons";
 import { TFunction } from "i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -63,6 +63,7 @@ import { UserCustomer } from "./UserCustomer";
 import { UserAttribute } from "@keycloak/keycloak-admin-client/lib/defs/custom/userRepresentation";
 import { useCustomConfig } from "../customLogic/context/CustomConfigContext";
 import { useWhoAmI } from "../context/whoami/WhoAmI";
+import { updateMarkBrandIdField } from "./utils/user-profile";
 
 export default function EditUser() {
   const { adminClient } = useAdminClient();
@@ -92,12 +93,17 @@ export default function EditUser() {
   const [bruteForced, setBruteForced] = useState<BruteForced>();
   const [isUnmanagedAttributesEnabled, setUnmanagedAttributesEnabled] =
     useState<boolean>();
-  const [userProfileMetadata, setUserProfileMetadata] =
-    useState<UserProfileMetadata>();
   const [refreshCount, setRefreshCount] = useState(0);
   const refresh = () => setRefreshCount((count) => count + 1);
   const lightweightUser = isLightweightUser(user?.id);
   const [upConfig, setUpConfig] = useState<UserProfileConfig>();
+
+  const [rawUserProfileMetadata, setRawUserProfileMetadata] =
+    useState<UserProfileMetadata>();
+  const userProfileMetadata = useMemo(
+    () => updateMarkBrandIdField(rawUserProfileMetadata, realmBrands),
+    [rawUserProfileMetadata, realmBrands],
+  );
 
   const toTab = (tab: UserTab) =>
     toUser({
@@ -188,36 +194,10 @@ export default function EditUser() {
         throw new Error(t("notFound"));
       }
 
-      const { userProfileMetadata, ...user } = userData;
+      const { userProfileMetadata: rawUserProfileMetadata, ...user } = userData;
 
-      // Кастомизируем поле бренд
-      const markBrandId = (userProfileMetadata?.attributes ?? []).find(
-        (attribute) => attribute.name === "markBrandId",
-      );
+      setRawUserProfileMetadata(rawUserProfileMetadata);
 
-      if (markBrandId) {
-        markBrandId.annotations = markBrandId.annotations ?? {};
-        markBrandId.annotations.inputType = "select";
-
-        markBrandId.validators = markBrandId.validators ?? {};
-        markBrandId.validators.options = {
-          options: realmBrands.map((realmBrand) => realmBrand.brandId),
-        };
-
-        markBrandId.annotations.inputOptionLabels = realmBrands.reduce(
-          (acc, realmBrand) => {
-            acc[realmBrand.brandId] = realmBrand.brandName;
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        markBrandId.annotations.defaultValue = realmBrands.find(
-          (realmBrand) => realmBrand.default,
-        )?.brandId;
-      }
-
-      setUserProfileMetadata(userProfileMetadata);
       user.unmanagedAttributes = unmanagedAttributes;
       user.attributes = filterManagedAttributes(
         user.attributes,

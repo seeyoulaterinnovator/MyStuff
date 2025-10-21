@@ -26,10 +26,7 @@ import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
 import ru.alamics.sso.util.validator.NotValidException;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
 
@@ -109,29 +106,27 @@ public class UserExtService {
     }
 
     private synchronized UserModel createUser(boolean bss, UserRequest userRequest) {
-        try {
-            userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
+        userRequest.setPhone(Util.getCleanUserPhone(userRequest.getPhone()));
 
-            UserModel user = session.users().addUser(realm, userRequest.getEmail());
-            updateUserFromRequest(user, userRequest, realm, session, false, bss);
+        UserModel user = session.users().addUser(realm, userRequest.getEmail());
+        updateUserFromRequest(user, userRequest, realm, session, false, bss);
 
-            registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), "bss", 4);
-            log.info(" registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), \"bss\", 4);" );
-            return user;
-        } finally {
-            if (session.getTransactionManager().isActive()) {
-                session.getTransactionManager().setRollbackOnly();
-            }
-        }
+        registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), "bss", 4);
+        log.info(" registeredUsersService.saveSuccessfulReg(user.getId(), realm.getId(), \"bss\", 4);");
+        return user;
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
 
         request.setEmail(UserServiceUtil.doCleanMail(request.getEmail()));
         request.setPhone(UserServiceUtil.doCleanPhone(request.getPhone()));
+
         FoundException exception = null;
 
         String userIdByPhone = null;
+
+        resolveTomsIdDmpIdBrandId(request);
+
         try {
             checkOnExistUserByPhone(request, realm);
         } catch (FoundException e) {
@@ -190,6 +185,59 @@ public class UserExtService {
         createAdminEvent(OperationType.CREATE, user);
         commit();
         return user;
+    }
+
+    private void resolveTomsIdDmpIdBrandId(UserRequest request) {
+        var token = auth.getToken();
+        if (token != null) {
+            var claims = token.getOtherClaims();
+
+            log.info(" resolveTomsIdDmpIdBrandId claims = " + claims);
+
+            // ---- TOMS ----
+            if (request.getTomsId() == null || request.getTomsId().isBlank()) {
+                Object tomsClaim = claims.get("tomsId");
+                if (tomsClaim == null) {
+                    tomsClaim = claims.get("toms");
+                }
+                if (tomsClaim instanceof String claimStr && !claimStr.isBlank()) {
+                    request.setTomsId(claimStr);
+                    log.info("[createUser.resolveTomsIdDmpIdBrandId] tomsId resolved from token → {}", claimStr);
+                } else {
+                    log.warn("[createUser.resolveTomsIdDmpIdBrandId] tomsId missing in token claims");
+                }
+            }
+
+            // ---- DMP ----
+            if (request.getDmpId() == null || request.getDmpId().isBlank()) {
+                Object dmpClaim = claims.get("dmpId");
+                if (dmpClaim == null) {
+                    dmpClaim = claims.get("dmp");
+                }
+                if (dmpClaim instanceof String claimStr && !claimStr.isBlank()) {
+                    request.setDmpId(claimStr);
+                    log.info("[createUser.resolveTomsIdDmpIdBrandId] dmpId resolved from token → {}", claimStr);
+                } else {
+                    log.warn("[createUser.resolveTomsIdDmpIdBrandId] dmpId missing in token claims");
+                }
+            }
+
+            // ---- Brand ----
+            if (request.getBrand().getMarkBrandId() == null || request.getBrand().getMarkBrandId().isBlank()) {
+                Object brandClaim = claims.get("brand");
+                if (brandClaim instanceof Map<?, ?> brandMap) {
+                    Object markBrandId = brandMap.get("markBrandId");
+                    if (markBrandId instanceof String id && !id.isBlank()) {
+                        request.getBrand().setMarkBrandId(id);
+                        log.info("[resolveTomsIdDmpIdBrandId] markBrandId resolved from admin token → {}", id);
+                    } else {
+                        log.warn("[resolveTomsIdDmpIdBrandId] markBrandId missing in admin token brand map");
+                    }
+                } else {
+                    log.warn("[resolveTomsIdDmpIdBrandId] brand claim missing or not a map in admin token");
+                }
+            }
+        }
     }
 
     private void checkOnExistUser(UserRequest request, RealmModel realm) throws FoundException {

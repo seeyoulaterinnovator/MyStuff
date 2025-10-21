@@ -13,6 +13,7 @@ import org.jboss.resteasy.reactive.NoCache;
 import org.jboss.resteasy.reactive.server.multipart.FormValue;
 import org.jboss.resteasy.reactive.server.multipart.MultipartFormDataInput;
 import org.keycloak.Config;
+import org.keycloak.TokenVerifier;
 import org.keycloak.admin.ui.rest.AvailableRoleMappingResource;
 import org.keycloak.admin.ui.rest.EffectiveRoleMappingResource;
 import org.keycloak.admin.ui.rest.model.ClientRole;
@@ -27,6 +28,7 @@ import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.*;
 import org.keycloak.models.cache.UserCache;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -45,8 +47,6 @@ import ru.alamics.sso.keycloak.facade.CustomerRequestService;
 import ru.alamics.sso.keycloak.lookup.Lookup;
 import ru.alamics.sso.keycloak.response.JsonResponse;
 import ru.alamics.sso.keycloak.util.MiscUtil;
-import ru.alamics.sso.registration.FoundException;
-import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.registration.service.BrandService;
 import ru.alamics.sso.service.ValidateService;
@@ -60,7 +60,6 @@ import ru.alamics.sso.user.model.DownloadUserRequest;
 import ru.alamics.sso.user.model.UserParameter;
 import ru.alamics.sso.user.model.UserRequest;
 import ru.alamics.sso.util.Util;
-import ru.alamics.sso.util.validator.NotValidException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -82,7 +81,7 @@ public class CustomUserResource {
     private final ValidateService validateService;
     private final RealmModel realm;
     protected KeycloakSession session;
-    private CustomerRequestService customerRequestService;
+    private final CustomerRequestService customerRequestService;
     private final BrandService brandService;
 
     public CustomUserResource(KeycloakSession session, AdminPermissionEvaluator auth) {
@@ -114,7 +113,7 @@ public class CustomUserResource {
         if (!validateEmail(request.getEmail())) {
             return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
-        return getUserResponse(request, false);
+        return getUserResponse(request, false, headers);
     }
 
     @POST
@@ -141,7 +140,7 @@ public class CustomUserResource {
             return ErrorResponse.error("Поле Email невалидно", Response.Status.BAD_REQUEST).getResponse();
         }
 
-        return getUserResponse(request, true);
+        return getUserResponse(request, true, headers);
     }
 
     private boolean validateEmail(String email) {
@@ -153,54 +152,156 @@ public class CustomUserResource {
                 || (phone.startsWith("7") && phone.length() == 11 && phone.matches("[\\d]+"));
     }
 
-    private Response getUserResponse(UserRequest request, boolean bss) {
+    private Response getUserResponse(UserRequest request, boolean bss, HttpHeaders headers) {
         try {
-            UserModel user = userService.createUser(request, bss);
-            String markBrandId = request.getMarkBrandId();
-            if (markBrandId == null && request.getBrand() != null) {
-                markBrandId = request.getBrand().getMarkBrandId();
+            log.info("========== [CREATE USER STARTED] ==========");
+
+            // 1. Логируем все заголовки
+            if (headers != null) {
+                log.info("[createUser] headers:");
+                headers.getRequestHeaders().forEach((k, v) -> log.info("   {} = {}", k, v));
             }
 
-            if (markBrandId != null) {
-                user.setSingleAttribute("markBrandId", markBrandId);
-            } else {
-                brandService.getDefaultBrandByRealm(realm.getId())
-                        .map(BrandEntity::getId)
-                        .ifPresent(defaultBrandById -> user.setSingleAttribute("markBrandId", defaultBrandById));
+            // 2. Логируем тело запроса
+            log.info("[createUser] body:\n{}", safeToJson(request));
+            String authHeader = headers != null ? headers.getHeaderString(HttpHeaders.AUTHORIZATION) : null;
+            AccessToken userToken = null;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                try {
+                    String jwt = authHeader.substring(7);
+                    userToken = TokenVerifier.create(jwt, AccessToken.class).getToken();
+                    log.info("[getUserResponse] extracted AccessToken for user: {}", userToken.getPreferredUsername());
+                } catch (Exception e) {
+                    log.warn("[getUserResponse] failed to parse AccessToken from Authorization header: {}", e.getMessage());
+                }
             }
-            customerRequestService.getCustomerName(request.getTomsId());
+
+            var adminAuth = auth != null ? auth.adminAuth() : null;
+            if (adminAuth != null && adminAuth.getToken() != null) {
+                var token = adminAuth.getToken();
+                log.info("[createUser] service token issuedFor={} | azp={} | audience={}",
+                        token.getIssuedFor(), token.getIssuedFor(), token.getAudience());
+            } else {
+                log.warn("[createUser] no adminAuth token found (service-account might be missing)");
+            }
+
+            UserModel user = userService.createUser(request, bss);
+
+            try {
+                resolveBrandId(request, user, userToken);
+            } catch (Exception e) {
+                log.error("[getUserResponse] Failed to assign brand - fallback to default realm brand: {}", e.getMessage());
+            }
+
             return JsonResponse.success()
                     .httpStatus(Response.Status.CREATED)
                     .addResult("user_id", user.getId())
                     .build();
         } catch (ModelDuplicateException e) {
             log.error("Could not create user", e);
-            customerRequestService.getCustomerName(request.getTomsId());
             return JsonResponse.error(Response.Status.BAD_REQUEST)
                     .message("Уже существует УЗ с таким username или email или phone")
                     .build();
-        } catch (ModelException me) {
-            log.error("Could not create user", me);
+        } catch (Exception e) {
+            log.error("Could not create user", e);
             return JsonResponse.error(Response.Status.INTERNAL_SERVER_ERROR)
-                    .message("Не удалось создать УЗ")
+                    .message("Ошибка при создании пользователя")
                     .build();
-        } catch (NotFoundException | FoundUserPostException e) {
-            log.error("Could not create user", e);
-            customerRequestService.getCustomerName(request.getTomsId());
-            return JsonResponse.error(Response.Status.BAD_REQUEST)
-                    .message(e.getMessage())
-                    .build();
-        } catch (FoundException e) {
-            log.error("Could not create user", e);
-            return JsonResponse.error(Response.Status.BAD_REQUEST)
-                    .message(e.getMessage())
-                    .addResult("info", e.getResult())
-                    .build();
-        } catch (NotValidException e) {
-            log.error("NotValidException", e);
-            return JsonResponse.error(Response.Status.BAD_REQUEST)
-                    .message(e.getMessage())
-                    .build();
+        }
+    }
+
+    private void resolveBrandId(UserRequest request, UserModel user, AccessToken userToken) {
+        String markBrandId = null;
+        String source = "none";
+
+        // 1. Если бренд явно передан в запросе (приоритетный источник)
+        if (request.getMarkBrandId() != null && !request.getMarkBrandId().isBlank()) {
+            markBrandId = request.getMarkBrandId().trim();
+            source = "request.markBrandId";
+        } else if (request.getBrand() != null && request.getBrand().getMarkBrandId() != null) {
+            markBrandId = request.getBrand().getMarkBrandId().trim();
+            source = "request.brand.markBrandId";
+        } else if (request.getAttributes() != null) {
+            List<String> attrValues = request.getAttributes().get("markBrandId");
+            if (attrValues != null && !attrValues.isEmpty()) {
+                markBrandId = attrValues.get(0);
+                source = "request.attribute.markBrandId";
+            }
+        }
+
+        // 2. Если не передан, пробуем взять у родителя
+        if (markBrandId == null && auth.adminAuth() != null) {
+            UserModel parent = auth.adminAuth().getUser();
+            if (parent != null) {
+                try {
+                    String parentBrandId = parent.getFirstAttribute("markBrandId");
+                    if (parentBrandId == null) {
+                        parentBrandId = parent.getFirstAttribute("brand.markBrandId");
+                    }
+                    if (parentBrandId != null && !parentBrandId.isBlank()) {
+                        markBrandId = parentBrandId.trim();
+                        source = "parent.attributes";
+                    }
+                } catch (IllegalStateException ise) {
+                    log.warn("[resolveBrandId] Cannot access parent attributes — {}", ise.getMessage());
+                }
+            }
+        }
+
+        // 3. Если всё ещё пусто — проверяем токен реального пользователя
+        if (markBrandId == null && userToken != null) {
+            Object brandClaim = userToken.getOtherClaims().get("brand");
+
+            // 3.1 Nested brand object
+            if (brandClaim instanceof Map<?, ?> brandMap) {
+                Object id = brandMap.get("markBrandId");
+                Object code = brandMap.get("brandCode");
+                Object name = brandMap.get("brandName");
+
+                if (id instanceof String s && !s.isBlank()) {
+                    markBrandId = s.trim();
+                    source = "userToken.brand.markBrandId";
+                    log.info("[resolveBrandId] brand from AccessToken.brand.markBrandId → {}", markBrandId);
+                } else {
+                    log.warn("[resolveBrandId] token.brand exists but has no markBrandId (brandCode={}, brandName={})", code, name);
+                }
+            }
+
+            // 3.2 Fallback — прямой claim markBrandId
+            if (markBrandId == null) {
+                Object directClaim = userToken.getOtherClaims().get("markBrandId");
+                if (directClaim instanceof String s && !s.isBlank()) {
+                    markBrandId = s.trim();
+                    source = "userToken.markBrandId";
+                    log.info("[resolveBrandId] brand from AccessToken.markBrandId → {}", markBrandId);
+                }
+            }
+
+            // 3.3 Fallback — brandCode
+            if (markBrandId == null) {
+                Object brandCode = userToken.getOtherClaims().get("brandCode");
+                if (brandCode instanceof String s && !s.isBlank()) {
+                    markBrandId = s.trim();
+                    source = "userToken.brandCode";
+                    log.info("[resolveBrandId] fallback brandCode used as markBrandId → {}", markBrandId);
+                }
+            }
+        }
+
+        // 4. Итог — если нашли бренд
+        if (markBrandId != null && !markBrandId.isBlank()) {
+            user.setSingleAttribute("markBrandId", markBrandId);
+            log.info("[resolveBrandId] brand assigned from {} → {}", source, markBrandId);
+        } else {
+            brandService.getDefaultBrandByRealm(realm.getName())
+                    .map(BrandEntity::getId)
+                    .ifPresentOrElse(
+                            defBrandId -> {
+                                user.setSingleAttribute("markBrandId", defBrandId);
+                                log.info("[resolveBrandId] default brand applied for realm {} → {}", realm.getName(), defBrandId);
+                            },
+                            () -> log.warn("[resolveBrandId] no default brand found for realm {}", realm.getName())
+                    );
         }
     }
 
@@ -716,5 +817,15 @@ public class CustomUserResource {
         if (user instanceof CustomUserAdapter) return ((CustomUserAdapter) user).getRealm();
 
         return realm;
+    }
+
+    private String safeToJson(Object obj) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(obj);
+        } catch (Exception e) {
+            return "Cannot serialize object: " + e.getMessage();
+        }
     }
 }

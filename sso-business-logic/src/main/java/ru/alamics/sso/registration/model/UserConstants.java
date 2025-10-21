@@ -1,5 +1,7 @@
 package ru.alamics.sso.registration.model;
 
+import javax.xml.transform.sax.SAXResult;
+
 public class UserConstants {
     private UserConstants () {
     }
@@ -10,7 +12,8 @@ public class UserConstants {
     public static final String ATTR_PHONE_NAME = "phone";
     public static final String ATTR_ORG_NAME = "orgName";
     public static final String ATTR_PHONE_VALIDATED_ON = "phone_validated_on";
-
+    public static final String ATTR_MARK_BRAND_ID = "markBrandId";
+    public static final String ATTR_MARK_BRAND_CODE = "markBrandCode";
     public static final String ATTR_USER_ID_NAME = "userId";
     public static final String ATTR_TOMS_NAME = "tomsId";
     public static final String ATTR_DMP_NAME = "dmpId";

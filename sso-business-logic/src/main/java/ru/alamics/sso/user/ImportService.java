@@ -280,14 +280,7 @@ public class ImportService {
 
     private UserEntity createUser(String realmId, ImportUsersDataModel data) {
 
-        UserEntity user = new UserEntity();
-        user.setCreatedTimestamp(System.currentTimeMillis());
-        user.setUsername(data.getEmail().toLowerCase());
-        user.setEmail(data.getEmail().toLowerCase(), false);
-        user.setFirstName(data.getFirstName());
-        user.setRealmId(realmId);
-        user.setEmailVerified(false);
-        user.setEnabled(false);
+        UserEntity user = getUserEntityFromImport(realmId, data);
         user = userRepository.save(user);
 
         RealmEntity realm = realmRepository.findRealmEntityById(realmId);
@@ -307,6 +300,18 @@ public class ImportService {
         attributeEntity.setValue(data.getPhone());
         userRepository.saveAttributes(attributeEntity);
 
+        return user;
+    }
+
+    static UserEntity getUserEntityFromImport(String realmId, ImportUsersDataModel data) {
+        UserEntity user = new UserEntity();
+        user.setCreatedTimestamp(System.currentTimeMillis());
+        user.setUsername(data.getEmail().toLowerCase());
+        user.setEmail(data.getEmail().toLowerCase(), false);
+        user.setFirstName(data.getFirstName());
+        user.setRealmId(realmId);
+        user.setEmailVerified(false);
+        user.setEnabled(false);
         return user;
     }
 

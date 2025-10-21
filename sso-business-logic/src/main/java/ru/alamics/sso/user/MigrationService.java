@@ -10,6 +10,7 @@ import org.keycloak.common.util.Time;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.jpa.AdminEventEntity;
 import org.keycloak.models.jpa.entities.*;
+import ru.alamics.sso.jpa.entity.BrandEntity;
 import ru.alamics.sso.jpa.entity.common.ImportUsersDataStatus;
 import ru.alamics.sso.jpa.entity.common.ImportUsersReportStatus;
 import ru.alamics.sso.jpa.repository.*;
@@ -17,6 +18,7 @@ import ru.alamics.sso.registration.FoundException;
 import ru.alamics.sso.registration.FoundUserPostException;
 import ru.alamics.sso.registration.dto.UserPostRequest;
 import ru.alamics.sso.registration.dto.UserPostResponse;
+import ru.alamics.sso.registration.service.BrandService;
 import ru.alamics.sso.registration.service.UserPostService;
 import ru.alamics.sso.schedule.ImportSchedule;
 import ru.alamics.sso.user.model.ImportUsersDataModel;
@@ -31,7 +33,7 @@ import ru.alamics.sso.util.validator.ValidatorBuilder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 @ApplicationScoped
 @Slf4j
@@ -40,8 +42,6 @@ public class MigrationService {
     private final static Long DEFAULT_ROLE_ID = 1L;   //Соответствует роли LPR, но это не точно
     private final static String DEFAULT_ROLE_STR = "LPR";
 
-    @Inject
-    ImportUsersReportRepository importUsersReportRepository;
     @Inject
     UserRepository userRepository;
     @Inject
@@ -56,6 +56,8 @@ public class MigrationService {
     ImportReportService importReportService;
     @Inject
     PersonalAccountService personalAccountService;
+    @Inject
+    BrandService brandService;
 
     public List<UserEntity> createImportUsers(ImportUsersReportModel reportModel, List<ImportUsersDataModel> dataList, Long scheduleStart) {
 
@@ -105,19 +107,17 @@ public class MigrationService {
                     } catch (AllNotValidException av) {
 
                         data.setErrors(av.getMessageList().toString());
-                        log.error("Importing user data is failed. {}", av.getMessageList().toString());
+                        getError(av.getMessageList().toString());
 
                     } catch (NotFoundException | NotValidException e) {
                         data.setErrors(e.getMessage());
-                        log.error("Importing user data is failed. {}", e.getMessage());
+                        getError(e.getMessage());
                     } catch (FoundException e) {
                         List<Object> errors = new LinkedList<>();
-                        e.getResult().forEach((k, v) -> {
-                            errors.add(v);
-                        });
+                        e.getResult().forEach((k, v) -> errors.add(v));
                         String errorsStr = errors.toString().substring(1, errors.toString().length() - 1);
                         data.setErrors(errorsStr);
-                        log.error("Importing user data is failed. {}", errorsStr);
+                        getError(errorsStr);
                     } finally {
 
                         if (user != null && modified) {
@@ -135,7 +135,7 @@ public class MigrationService {
                             reportModel.setCountClones(countClones.get());
                             reportModel.setCountCreatedUsers(createdUsers.get());
                             importReportService.updateReport(reportModel);
-                            log.info("ProcessedUsers " + processedUsers);
+                            log.info("ProcessedUsers {}", processedUsers);
                         }
                     }
                 });
@@ -148,14 +148,12 @@ public class MigrationService {
             // закомментировано, потому что для пакетной загрузки это может быть не окончательный статус
             //importReportService.updateReport(reportModel);
 
-            createAdminEvent(OperationType.CREATE, reportModel, reportModel.getRealmId());
+            createAdminEvent(reportModel, reportModel.getRealmId());
 
-            log.info(String.format("importing users from file %s is done: countUsers=%s, countCreatedUsers=%s, countClones=%s ",
-                    reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(),
-                    reportModel.getCountClones()));
+            log.info("importing users from file {} is done: countUsers={}, countCreatedUsers={}, countClones={} ", reportModel.getName(), reportModel.getCountImportUsers(), reportModel.getCountCreatedUsers(), reportModel.getCountClones());
         } catch (RepeatNextTimeException rte) {
 
-            log.info("Interrupted by timeout, processed " + processedUsers);
+            log.info("Interrupted by timeout, processed {}", processedUsers);
 
             reportModel.setCountClones(countClones.get());
             reportModel.setCountCreatedUsers(createdUsers.get());
@@ -164,10 +162,14 @@ public class MigrationService {
             //importReportService.updateReport(reportModel);
 
         } catch (Exception e) {
-            log.error("Error, but processed " + processedUsers, e);
+            log.error("Error, but processed {}", processedUsers, e);
             throw e;
         }
         return entities;
+    }
+
+    private static void getError(String av) {
+        log.error("Importing user data is failed. {}", av);
     }
 
     private void addMigrationAttribute(String reportId, UserEntity user, long migrationStarts) {
@@ -192,6 +194,15 @@ public class MigrationService {
             return byPhone;
         }
 
+        FoundException foundException = getFoundException(byPhone, byEmail);
+        if (foundException.getResult() != null) {
+            throw foundException;
+        }
+
+        return null;
+    }
+
+    private static FoundException getFoundException(UserEntity byPhone, UserEntity byEmail) {
         FoundException foundException = new FoundException();
         if (byPhone == null && byEmail != null) {
             foundException.addResult("error1", "User exists with same email userId " + byEmail.getId());
@@ -201,11 +212,7 @@ public class MigrationService {
             foundException.addResult("error1", "User exists with same email userId " + byEmail.getId());
             foundException.addResult("error2", "User exists with same phone userId " + byPhone.getId());
         }
-        if (foundException.getResult() != null) {
-            throw foundException;
-        }
-
-        return null;
+        return foundException;
     }
 
     private void checkToms(ImportUsersDataModel o) throws NotFoundException {
@@ -232,14 +239,7 @@ public class MigrationService {
 
     private UserEntity createUser(String realmId, ImportUsersDataModel importUserData) {
 
-        UserEntity user = new UserEntity();
-        user.setCreatedTimestamp(System.currentTimeMillis());
-        user.setUsername(importUserData.getEmail().toLowerCase());
-        user.setEmail(importUserData.getEmail().toLowerCase(), false);
-        user.setFirstName(importUserData.getFirstName());
-        user.setRealmId(realmId);
-        user.setEmailVerified(false);
-        user.setEnabled(false);
+        UserEntity user = ImportService.getUserEntityFromImport(realmId, importUserData);
         if (importUserData.getCleanPassword() != null) {
             user.setEmailVerified(true);
             user.setEnabled(false);
@@ -262,14 +262,55 @@ public class MigrationService {
         attributeEntity.setValue(importUserData.getPhone());
         userRepository.saveAttributes(attributeEntity);
 
+        resolveBrandId(importUserData, user);
+
         return user;
     }
 
-    private void createAdminEvent(OperationType operationType, ImportUsersReportModel report, String realmId) {
+    private void resolveBrandId(ImportUsersDataModel importUserData, UserEntity user) {
+        String markBrandId = importUserData.getMarkBrandId();
+        if (markBrandId != null && !markBrandId.isBlank()) {
+            UserAttributeEntity brandIdAttr = new UserAttributeEntity();
+            brandIdAttr.setId(UUID.randomUUID().toString());
+            brandIdAttr.setName(ATTR_MARK_BRAND_ID);
+            brandIdAttr.setUser(user);
+            brandIdAttr.setValue(markBrandId);
+            userRepository.saveAttributes(brandIdAttr);
+            UserAttributeEntity brandCodeAttr = new UserAttributeEntity();
+            brandCodeAttr.setId(UUID.randomUUID().toString());
+            brandCodeAttr.setName(ATTR_MARK_BRAND_CODE);
+            brandCodeAttr.setUser(user);
+            brandCodeAttr.setValue(markBrandId);
+            userRepository.saveAttributes(brandCodeAttr);
+            return;
+        }
+
+        RealmEntity realm = realmRepository.findRealmEntityById(user.getRealmId());
+        if (realm != null) {
+            brandService.getDefaultBrandByRealm(realm.getId())
+                    .map(BrandEntity::getId)
+                    .ifPresent(defBrandId -> {
+                        UserAttributeEntity brandIdAttr = new UserAttributeEntity();
+                        brandIdAttr.setId(UUID.randomUUID().toString());
+                        brandIdAttr.setName(ATTR_MARK_BRAND_ID);
+                        brandIdAttr.setUser(user);
+                        brandIdAttr.setValue(defBrandId);
+                        userRepository.saveAttributes(brandIdAttr);
+                        UserAttributeEntity brandCodeAttr = new UserAttributeEntity();
+                        brandCodeAttr.setId(UUID.randomUUID().toString());
+                        brandCodeAttr.setName(ATTR_MARK_BRAND_CODE);
+                        brandCodeAttr.setUser(user);
+                        brandCodeAttr.setValue(defBrandId);
+                        userRepository.saveAttributes(brandCodeAttr);
+                    });
+        }
+    }
+
+    private void createAdminEvent(ImportUsersReportModel report, String realmId) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(realmId);
-        adminEvent.setOperationType(operationType.name());
+        adminEvent.setOperationType(OperationType.CREATE.name());
         adminEvent.setAuthRealmId(realmId);
         adminEvent.setResourcePath("migration/importUsersReport/" + report.getId());
         adminEvent.setResourceType("USER");
@@ -287,7 +328,7 @@ public class MigrationService {
 
         userPostRequest.setRoleId(DEFAULT_ROLE_ID);
 
-        String postId = null;
+        String postId;
         try {
             UserPostResponse userPostResponse = userPostService.save(userPostRequest);
             postId = userPostResponse.getId();
