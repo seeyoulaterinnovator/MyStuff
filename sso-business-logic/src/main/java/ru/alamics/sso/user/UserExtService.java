@@ -28,7 +28,7 @@ import ru.alamics.sso.util.validator.NotValidException;
 
 import java.util.*;
 
-import static ru.alamics.sso.registration.model.UserConstants.ATTR_PHONE_NAME;
+import static ru.alamics.sso.registration.model.UserConstants.*;
 
 /**
  * creates user from external sources
@@ -97,6 +97,16 @@ public class UserExtService {
         String phone = Util.getCleanUserPhone(request.getPhone());
         if (phone != null)
             user.setAttribute(ATTR_PHONE_NAME, Collections.singletonList(phone));
+        if (request.getTomsId() != null) {
+            user.setSingleAttribute(ATTR_TOMS_NAME, request.getTomsId());
+        }
+        if (request.getDmpId() != null) {
+            user.setSingleAttribute(ATTR_DMP_NAME, request.getDmpId());
+        }
+        if (request.getMarkBrandId() != null) {
+            user.setSingleAttribute(ATTR_MARK_BRAND_ID, request.getMarkBrandId());
+            user.setSingleAttribute(ATTR_MARK_BRAND_CODE, request.getMarkBrandId());
+        }
     }
 
     private void commit() {
@@ -117,6 +127,7 @@ public class UserExtService {
     }
 
     public UserModel createUser(UserRequest request, boolean bss) throws FoundException, NotFoundException, FoundUserPostException, NotValidException {
+        log.info("[UserExtService#createUser] received request: {}", request);
 
         request.setEmail(UserServiceUtil.doCleanMail(request.getEmail()));
         request.setPhone(UserServiceUtil.doCleanPhone(request.getPhone()));
@@ -192,7 +203,7 @@ public class UserExtService {
         if (token != null) {
             var claims = token.getOtherClaims();
 
-            log.info(" resolveTomsIdDmpIdBrandId claims = " + claims);
+            log.info(" resolveTomsIdDmpIdBrandId claims = {} of user = {} for token = {}", claims, auth.getUser().getUsername(), token);
 
             // ---- TOMS ----
             if (request.getTomsId() == null || request.getTomsId().isBlank()) {
@@ -223,12 +234,12 @@ public class UserExtService {
             }
 
             // ---- Brand ----
-            if (request.getBrand().getMarkBrandId() == null || request.getBrand().getMarkBrandId().isBlank()) {
+            if (request.getMarkBrandId() == null || request.getMarkBrandId().isBlank()) {
                 Object brandClaim = claims.get("brand");
                 if (brandClaim instanceof Map<?, ?> brandMap) {
                     Object markBrandId = brandMap.get("markBrandId");
                     if (markBrandId instanceof String id && !id.isBlank()) {
-                        request.getBrand().setMarkBrandId(id);
+                        request.setMarkBrandId(id);
                         log.info("[resolveTomsIdDmpIdBrandId] markBrandId resolved from admin token → {}", id);
                     } else {
                         log.warn("[resolveTomsIdDmpIdBrandId] markBrandId missing in admin token brand map");
