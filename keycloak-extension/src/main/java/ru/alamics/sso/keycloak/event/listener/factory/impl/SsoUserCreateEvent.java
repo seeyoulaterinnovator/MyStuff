@@ -9,6 +9,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.theme.Theme;
 import ru.alamics.sso.keycloak.event.listener.factory.SsoEvent;
 import ru.alamics.sso.keycloak.lookup.Lookup;
+import ru.alamics.sso.registration.model.UserEntityRepresentation;
 import ru.alamics.sso.settings.SettingsService;
 import ru.alamics.sso.util.Util;
 
@@ -52,7 +53,6 @@ public class SsoUserCreateEvent extends SsoEvent {
             if (userId == null) {
                 return;
             }
-
 
             if (userModel != null && userModel.getEmail() != null) {
 

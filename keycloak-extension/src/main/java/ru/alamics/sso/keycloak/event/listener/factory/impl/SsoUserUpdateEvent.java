@@ -57,6 +57,19 @@ public class SsoUserUpdateEvent extends SsoEvent {
                 return;
             }
 
+            RealmModel realm = model.getRealm(this.event.getRealmId());
+            UserModel user = session.users().getUserById(realm, userId);
+            if (user == null || user.getEmail() == null) {
+                log.error("User '{}' not found or does not have email", userId);
+                return;
+            }
+
+            String markBrandIdValue = user.getFirstAttribute("markBrandId");
+            if (markBrandIdValue != null) {
+                user.setSingleAttribute("markBrandCode", markBrandIdValue);
+                log.info("Synchronized markBrandCode with markBrandId for userId={}", userId);
+            }
+
             AdminEventEntity adminEventEntity = findAdminEvent(userId);
             if (userNow.isEnabled() && adminEventEntity == null) {
                 return;
@@ -73,14 +86,6 @@ public class SsoUserUpdateEvent extends SsoEvent {
 
             log.info("ExtendedEventListener: admin update user");
 
-            RealmModel realm = model.getRealm(this.event.getRealmId());
-            UserModel user = session.users().getUserById(realm, userId);
-
-            if (user == null || user.getEmail() == null) {
-                log.error(String.format("User '%s' not found or do not have email", userId));
-                return;
-            }
-
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("userName", user.getUsername());
             attributes.put("userFirstName", user.getFirstName());
@@ -91,26 +96,37 @@ public class SsoUserUpdateEvent extends SsoEvent {
                 attributes.put("phone", Util.getFormatNumber(phone));
             }
 
-            attributes.put("emailEnabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
-            attributes.put("emailDisabledAccountBodyHtml", settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
-            attributes.put("emailLoginAndPhoneHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
-            attributes.put("emailLoginHtml", settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
-            attributes.put("emailPasswordFooterHtml", settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
+            attributes.put("emailEnabledAccountBodyHtml",
+                    settingsService.getSettingsStringValue(EMAIL_ENABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailDisabledAccountBodyHtml",
+                    settingsService.getSettingsStringValue(EMAIL_DISABLE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginAndPhoneHtml",
+                    settingsService.getSettingsStringValue(EMAIL_LOGIN_AND_PHONE_ACCOUNT, realm.getName()));
+            attributes.put("emailLoginHtml",
+                    settingsService.getSettingsStringValue(EMAIL_LOGIN_ACCOUNT, realm.getName()));
+            attributes.put("emailPasswordFooterHtml",
+                    settingsService.getSettingsStringValue(EMAIL_PASSWORD_FOOTER_ACCOUNT, realm.getName()));
             attributes.put("email", user.getEmail());
-            int timeTokenResetPass = settingsService.getSettingsIntValue(SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
+
+            int timeTokenResetPass = settingsService.getSettingsIntValue(
+                    SettingConstants.TIME_TOKEN_RESET_PASSWORD, realm.getName());
             String expirationStrRusPass = Translator.getRusTranslateTimeUnitBySec(timeTokenResetPass);
             attributes.put("expTimePass", expirationStrRusPass);
+
             if (userNow.isEnabled()) {
-//                long blockValue = settingsService.getSettingsLongValue(SettingConstants.BLOCK_NOTIFICATION_OF_UNLOCKING, realm.getName());
-//                if (blockValue > 0) {
-                    this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()), BODY_TEMPLATE_ENABLE, attributes);
-//                }
-                this.recordLoginUser(userId);//При разблокировании юзера, логиним его
+                this.sendEmail(user, realm,
+                        settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_ENABLE, realm.getName()),
+                        BODY_TEMPLATE_ENABLE, attributes);
+                this.recordLoginUser(userId); // При разблокировании юзера, логиним его
                 return;
             }
-            this.sendEmail(user, realm, settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_DISABLE, realm.getName()), BODY_TEMPLATE_DISABLE, attributes);
+
+            this.sendEmail(user, realm,
+                    settingsService.getSettingsStringValue(ACCOUNT_SUBJECT_DISABLE, realm.getName()),
+                    BODY_TEMPLATE_DISABLE, attributes);
+
         } catch (Exception e) {
-            log.error("Error ", e);
+            log.error("Error during SsoUserUpdateEvent.execute()", e);
         }
     }
 
@@ -118,10 +134,10 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private AdminEventEntity findAdminEvent(String userId) {
         EntityManager em = this.getSession().getProvider(JpaConnectionProvider.class).getEntityManager();
         List<AdminEventEntity> adminEventEntities = em.createQuery("select ae " +
-                "from AdminEventEntity ae " +
-                "where ae.representation like concat('%', :userId, '%') " +
-                "and ae.operationType in ('CREATE', 'UPDATE') " +
-                "order by ae.time DESC ", AdminEventEntity.class)
+                        "from AdminEventEntity ae " +
+                        "where ae.representation like concat('%', :userId, '%') " +
+                        "and ae.operationType in ('CREATE', 'UPDATE') " +
+                        "order by ae.time DESC ", AdminEventEntity.class)
                 .setParameter("userId", userId)
                 .getResultList();
         if (adminEventEntities == null || adminEventEntities.isEmpty() || adminEventEntities.size() == 1) {
@@ -134,19 +150,19 @@ public class SsoUserUpdateEvent extends SsoEvent {
     private void recordLoginUser(final String userId) {
         LoginHistory loginHistoryService = Lookup.lookup(LoginHistory.class);
         Optional.ofNullable(loginHistoryService).ifPresent(loginHistory -> {
-           RealmModel realm = session.getContext().getRealm();
-           if (realm == null) {
-               log.warn("recordLoginUser: realm is null, cannot record login for user {}", userId);
-               return;
-           }
+            RealmModel realm = session.getContext().getRealm();
+            if (realm == null) {
+                log.warn("recordLoginUser: realm is null, cannot record login for user {}", userId);
+                return;
+            }
 
-           UserModel userModel = session.users().getUserById(realm, userId);
-           if (userModel == null) {
-               log.warn("recordLoginUser: user {} not found in realm {}", userId, realm.getName());
-               return;
-           }
+            UserModel userModel = session.users().getUserById(realm, userId);
+            if (userModel == null) {
+                log.warn("recordLoginUser: user {} not found in realm {}", userId, realm.getName());
+                return;
+            }
 
-           loginHistory.createSuccessAuth(userModel, realm.getName());
+            loginHistory.createSuccessAuth(userModel, realm.getName());
         });
     }
 }
