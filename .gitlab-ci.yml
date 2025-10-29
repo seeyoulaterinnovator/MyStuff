@@ -49,7 +49,7 @@ stages:
     - helm history -n ${NAMESPACE} ${FULL_PROJECT_NAME} --max 5
   variables:
     NAMESPACE: '${PROD_K8S_NAMESPACE}'
-    REPLICA_COUNT: '1'
+    REPLICA_COUNT: '5'
 
 .frontend:theme:build:
   stage: build
