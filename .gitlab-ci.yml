@@ -40,8 +40,8 @@ stages:
   stage: deploy
   image: harbor.ertelecom.ru/b2bweb/kubectl-helm:1.24-alpine
   when: manual
-  # only:
-  #   - tags
+  only:
+    - tags
   script:
     - export FULL_PROJECT_NAME=$(echo "${CI_PROJECT_PATH_SLUG}" | sed -e 's/-//g')
     - consul-template -once -template ".helm/values-prod-k8s.yaml.tpl:values.yaml"
@@ -260,6 +260,26 @@ domru:voronezh-k8s:
     VALUES_TLS5: "tls: [{secretName: wildcard-2090909-ru, hosts: [\"auth.2090909.ru\"]}]"
     FQDN6: "auth.web.r-x.team"
     VALUES_TLS6: "tls: [{secretName: wildcard-web-rx-team, hosts: [\"auth.web.r-x.team\"]}]"
+
+domru:prod:cc1:
+  extends: .domru:k8s:template
+  tags:
+    - k8s-cc1-b2bweb-prod
+  environment:
+    name: production/cc1
+    url: https://auth.dom.ru
+  variables:
+    DC_NAME: cc1
+    KC_CACHE_CONFIG_FILE: 'cache-ispn.persistent.xml'
+    KC_CACHE_STACK: 'kubernetes'
+    KC_FEATURES: 'persistent-user-sessions'
+    INGRESS_CLASS: "nginx-waf"
+    FQDN: "auth.dom.ru"
+    FQDN2: "auth.domru.ru"
+    FQDN3: "auth.ertelecom.ru"
+    FQDN4: "auth.tcenter.ru"
+    FQDN5: "auth.2090909.ru"
+    FQDN6: "auth.web.r-x.team"
 
 domru:prod:cc3:
   extends: .domru:k8s:template
