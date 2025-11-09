@@ -2,6 +2,7 @@ name: "sso-new"
 services:
 
   mariadb:
+    platform: linux/amd64
     image: mariadb:10.11
     ports:
       - "3306:3306"
@@ -19,6 +20,7 @@ services:
       - ./volumes/mariadb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:ro
 
   mockserver:
+    platform: linux/amd64
     image: mockserver/mockserver:5.15.0
     ports:
       - "1080:1080"
@@ -29,6 +31,7 @@ services:
       - ./volumes/mockserver/initialization.json:/initialization.json:ro
 
   smtp4dev:
+    platform: linux/amd64
     image: rnwood/smtp4dev:v3
     ports:
       - "25:25"
@@ -39,6 +42,7 @@ services:
           memory: 128m
 
   keycloak:
+    platform: linux/amd64
     depends_on:
       mariadb:
         condition: service_healthy
@@ -92,6 +96,8 @@ services:
       APP_PROPS_UPDATE_DELAY_SECS: 60
       # DEV_HTTP_LOG_ALLOWED: true
       ERTH_SSO_E2E_ENABLED: ${ERTH_SSO_E2E_ENABLED}
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
       - ./volumes/keycloak/opt/keycloak/bin/kc-custom.sh:/opt/keycloak/bin/kc-custom.sh:ro
       - ./configs/infinispan15/cache-ispn.persistent.xml:/opt/keycloak/conf/cache-ispn.persistent.xml:ro
@@ -124,26 +130,20 @@ services:
       - ./volumes/keycloak-config-cli/config/:/config/:ro
     restart: no
 
-  nginx:
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    build:
-      # language=Dockerfile
-      dockerfile_inline: |
-        FROM alpine/openssl:3.3.2 as openssl
-        RUN openssl req -newkey rsa:2048 -days 3650 -nodes -sha256 -x509 \
-            -keyout /tmp/key.pem -out /tmp/cert.pem  \
-            -subj "/C=RU/ST=PRM/L=Perm/O=My Inc/OU=Test/CN=www.erth.test/emailAddress=noreply@www.erth.test"
-        FROM nginx:1.15.3
-        COPY --from=openssl /tmp/key.pem /tmp/cert.pem /etc/nginx/ssl/default/
-    ports:
-      - "8180:8180"
-      - "443:443"
-    volumes:
-      - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./volumes/nginx/etc/nginx/conf.d/default-ssl.conf:/etc/nginx/conf.d/default-ssl.conf:ro
-      - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
-    deploy:
-      resources:
-        limits:
-          memory: 32m
+  #       FROM alpine/openssl:3.3.2 as openssl
+  #       RUN openssl req -newkey rsa:2048 -days 3650 -nodes -sha256 -x509 \
+  #           -keyout /tmp/key.pem -out /tmp/cert.pem  \
+  #           -subj "/C=RU/ST=PRM/L=Perm/O=My Inc/OU=Test/CN=www.erth.test/emailAddress=noreply@www.erth.test"
+  #       FROM nginx:1.15.3
+  #       COPY --from=openssl /tmp/key.pem /tmp/cert.pem /etc/nginx/ssl/default/
+  #   ports:
+  #     - "8180:8180"
+  #     - "443:443"
+  #   volumes:
+  #     - ./volumes/nginx/etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - ./volumes/nginx/etc/nginx/conf.d/default-ssl.conf:/etc/nginx/conf.d/default-ssl.conf:ro
+  #     - ./volumes/nginx/usr/share/nginx/html:/usr/share/nginx/html:ro
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 32m
