@@ -41,10 +41,7 @@ import static ru.alamics.sso.settings.SettingConstants.*;
 @Slf4j
 public class EmailSender {
     private static final String SEND_INTERVAL_PROPERTY = "emailSender.interval.milliseconds";
-    private static final String DO_NOT_SEND_PROPERTY = "emailSender.dont.send";
-
     private long sendInterval = 1000;
-    private boolean dontSend = false;
 
     private FreeMarkerProvider freeMarkerUtil;
     private BlockingQueue<EmailModel> emailQueue;
@@ -80,7 +77,13 @@ public class EmailSender {
 
     @PostConstruct
     public void init() {
-        this.emailSenderProvider = new DefaultEmailSenderProvider(null);
+        if (session != null) {
+            this.emailSenderProvider = session.getProvider(EmailSenderProvider.class);
+        }
+        if (this.emailSenderProvider == null) {
+            log.warn("Keycloak session is not available. Falling back to DefaultEmailSenderProvider");
+            this.emailSenderProvider = new DefaultEmailSenderProvider(null);
+        }
         this.emailQueue = new LinkedBlockingQueue<>();
         this.freeMarkerUtil = session.getProvider(FreeMarkerProvider.class);
         this.executorService = Executors.newSingleThreadExecutor();
@@ -89,10 +92,9 @@ public class EmailSender {
         settingsService = Lookup.lookup(SettingsService.class);
 
         sendInterval = properties.getPropertyLong(SEND_INTERVAL_PROPERTY, 1000, "EmailSender interval: default value used: '%s' = '%s'");
-        dontSend = Boolean.parseBoolean(properties.getProperty(DO_NOT_SEND_PROPERTY));
     }
 
-    private void createEmailEvent(OperationType operationType, EmailModel emailModel, String emailTheme) {
+    private void createEmailEvent(OperationType operationType, EmailModel emailModel, String emailTheme, String error) {
         AdminEventEntity adminEvent = new AdminEventEntity();
         adminEvent.setTime(Time.toMillis(Time.currentTime()));
         adminEvent.setRealmId(emailModel.getRealmModel().getName());
@@ -104,6 +106,13 @@ public class EmailSender {
         repr.put("userId", emailModel.getUser().getId());
         repr.put("email", emailModel.getUser().getEmail());
         repr.put("emailTheme", emailTheme);
+        if (error != null) {
+            repr.put("status", "ERROR");
+            repr.put("errorMessage", error);
+            adminEvent.setError(error);
+        } else {
+            repr.put("status", "SUCCESS");
+        }
         try {
             adminEvent.setRepresentation(JsonSerialization.writeValueAsString(repr));
         } catch (IOException e) {
@@ -187,18 +196,21 @@ public class EmailSender {
             try {
                 EmailModel emailModel = null;
                 while ((emailModel = emailQueue.take()) != null) {
+                    EmailTemplate template = null;
                     try {
-                        EmailTemplate template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
+                        template = processTemplate(emailModel.getSubject(), emailModel.getSubjectAttributes(),
                                 emailModel.getBodyTemplate(), emailModel.getBodyAttributes(),
                                 emailModel.getTheme(), emailModel.getLocale(),emailModel.getRealmModel().getName());
-                        if (!dontSend) {
-                            emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
-                            createEmailEvent(OperationType.ACTION, emailModel, template.subject);
-                        } else {
-                            log.info("FAKE sending to {} due to properties", emailModel.getUser().getEmail());
-                        }
+                        emailSenderProvider.send(emailModel.getRealmModel().getSmtpConfig(), emailModel.getUser(), template.getSubject(), template.getTextBody(), template.getHtmlBody());
+                        createEmailEvent(OperationType.ACTION, emailModel, template.subject, null);
                         log.info("send to {} is finished. EmailQueueSize={}, SendInterval={}", emailModel.getUser().getEmail(), getEmailQueueSize(), sendInterval);
                     } catch (Exception e) {
+                        String emailTheme = template != null ? template.getSubject() : emailModel.getSubject();
+                        String errorMessage = e.getMessage();
+                        if (errorMessage == null) {
+                            errorMessage = e.getClass().getName();
+                        }
+                        createEmailEvent(OperationType.ACTION, emailModel, emailTheme, errorMessage);
                         log.error(String.format("send to %s is failed : EmailQueueSize=%d ", emailModel.getUser().getEmail(), getEmailQueueSize()), e);
                     }
 
